@@ -44,3 +44,54 @@
     @apply mb-2 block text-sm font-bold text-ink;
   }
 }
+
+@layer utilities {
+  @keyframes about-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes about-fade {
+    from {
+      opacity: 0;
+      transform: translateY(24px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .about-reveal {
+    animation: about-reveal 700ms ease both;
+  }
+
+  .about-reveal:nth-child(2) {
+    animation-delay: 100ms;
+  }
+
+  .about-reveal:nth-child(3) {
+    animation-delay: 200ms;
+  }
+
+  .about-fade {
+    animation: about-fade 700ms ease both;
+  }
+
+  .about-card {
+    animation: about-fade 650ms ease both;
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  .about-card:hover {
+    border-color: rgb(183 110 121 / 0.35);
+    box-shadow: 0 18px 45px rgb(74 40 48 / 0.10);
+    transform: translateY(-4px);
+  }
+}

@@ -1,13 +1,15 @@
-import { Menu, ShoppingBag, Sparkles, X } from 'lucide-react';
+import { Menu, ShoppingBag, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { selectCartCount, useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
 import { cn } from '../utils/cn';
+import logo from '../assets/bornil logo.png';
 
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Products', href: '/products' },
+  { label: 'About Us', href: '/about' },
 ];
 
 export default function MainLayout() {
@@ -36,14 +38,8 @@ export default function MainLayout() {
     <div className="min-h-screen bg-pearl">
       <header className="sticky top-0 z-50 border-b border-roseGold/10 bg-pearl/90 backdrop-blur-xl">
         <div className="container-pad flex h-20 items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-full bg-ink text-champagne">
-              <Sparkles size={20} />
-            </span>
-            <span>
-              <span className="block font-display text-2xl font-bold leading-none">Bornil Vibes</span>
-              <span className="text-xs font-bold uppercase tracking-[0.25em] text-roseGold">Jewelry</span>
-            </span>
+          <Link to="/" className="flex items-center" aria-label="Bornil Vibes home">
+            <img src={logo} alt="Bornil Vibes" className="h-16 w-auto object-contain md:h-20" />
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">{nav}</nav>

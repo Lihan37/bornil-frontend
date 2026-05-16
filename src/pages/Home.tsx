@@ -1,4 +1,4 @@
-import { ArrowRight, Gem, ShieldCheck, Truck } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
@@ -15,49 +15,36 @@ export default function Home() {
 
   return (
     <>
-      <section className="container-pad py-8 sm:py-12">
-        <div className="grid items-center gap-8 rounded-[2rem] border border-roseGold/10 bg-white p-5 shadow-soft md:grid-cols-[1.05fr_0.95fr] md:p-8">
-          <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-roseGold">Soft gold, bridal glow, everyday sparkle</p>
-            <h1 className="mt-4 font-display text-4xl font-extrabold leading-tight text-ink sm:text-5xl lg:text-6xl">
+      <section className="relative isolate min-h-[calc(100vh-5rem)] overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=2400&q=85"
+          alt="Bornil Vibes jewelry collection"
+          onError={handleImageError}
+          className="absolute inset-0 -z-20 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 -z-10 bg-ink/55" />
+        <div className="container-pad flex min-h-[calc(100vh-5rem)] items-center justify-center py-16 text-center">
+          <div className="mx-auto max-w-4xl">
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-champagne">Soft gold, bridal glow, everyday sparkle</p>
+            <h1 className="mt-4 font-display text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-7xl">
               Elegant jewelry for every Bornil Vibes moment.
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-7 text-ink/65">
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-white/85">
               Discover earrings, necklaces, rings, bangles, anklets, hair accessories, and bridal sets curated for a premium feminine wardrobe.
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link to="/products" className="btn-primary">View all products <ArrowRight size={17} /></Link>
-              <Link to="/products?category=Bridal%20Jewelry" className="btn-secondary">Explore bridal</Link>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link to="/products" className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-ink transition hover:bg-champagne">
+                View all products <ArrowRight size={17} />
+              </Link>
+              <Link to="/products?category=Bridal%20Jewelry" className="inline-flex items-center justify-center rounded-full border border-white/60 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white hover:text-ink">
+                Explore bridal
+              </Link>
             </div>
-          </div>
-          <div className="relative min-h-[340px] overflow-hidden rounded-[1.6rem] bg-blush">
-            <img
-              src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1200&q=80"
-              alt="Bornil Vibes jewelry collection"
-              onError={handleImageError}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute bottom-4 left-4 right-4 rounded-3xl bg-white/88 p-4 backdrop-blur">
+            <div className="mx-auto mt-10 max-w-xl rounded-3xl bg-white/88 p-4 text-left text-ink backdrop-blur sm:text-center">
               <p className="font-display text-2xl font-bold">New bridal edit</p>
               <p className="mt-1 text-sm text-ink/65">Pearls, antique gold, and statement details.</p>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="container-pad py-10">
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            { icon: Gem, title: 'Premium Finish', text: 'Rose-gold and antique-gold accents.' },
-            { icon: Truck, title: 'Fast Delivery', text: 'Reliable delivery across Bangladesh.' },
-            { icon: ShieldCheck, title: 'Secure Checkout', text: 'JWT-ready flow with protected checkout.' },
-          ].map((item) => (
-            <div key={item.title} className="rounded-3xl border border-roseGold/10 bg-white p-5">
-              <item.icon className="text-roseGold" size={24} />
-              <h3 className="mt-4 font-bold">{item.title}</h3>
-              <p className="mt-1 text-sm text-ink/60">{item.text}</p>
-            </div>
-          ))}
         </div>
       </section>
 

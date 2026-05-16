@@ -4,6 +4,7 @@ import AddProduct from '../pages/admin/AddProduct';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import ManageProducts from '../pages/admin/ManageProducts';
 import Orders from '../pages/admin/Orders';
+import About from '../pages/About';
 import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
 import Home from '../pages/Home';
@@ -20,6 +21,7 @@ export default function AppRouter() {
           <Route index element={<Home />} />
           <Route path="products" element={<Products />} />
           <Route path="products/:id" element={<ProductDetails />} />
+          <Route path="about" element={<About />} />
           <Route path="cart" element={<Cart />} />
           <Route path="login" element={<LoginRegister />} />
           <Route element={<ProtectedRoute />}>
