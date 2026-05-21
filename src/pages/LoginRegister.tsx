@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -36,7 +37,15 @@ export default function LoginRegister() {
       toast.success(mode === 'login' ? 'Logged in successfully' : 'Account created');
       navigate(data.user.role === 'admin' ? '/admin' : '/');
     },
-    onError: () => toast.error('Authentication failed. Check your backend API and credentials.'),
+    onError: (error) => {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || 'Authentication failed. Check your backend API and credentials.'
+        : 'Authentication failed. Check your backend API and credentials.';
+      toast.error(message);
+      if (message.toLowerCase().includes('already exists')) {
+        setMode('login');
+      }
+    },
   });
 
   return (

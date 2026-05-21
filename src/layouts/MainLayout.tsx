@@ -1,6 +1,7 @@
 import { Menu, ShoppingBag, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { selectCartCount, useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
 import { cn } from '../utils/cn';
@@ -14,10 +15,13 @@ const navItems = [
 
 export default function MainLayout() {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
   const items = useCartStore((state) => state.items);
   const count = selectCartCount(items);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+
+  const isAdminArea = location.pathname.startsWith('/admin');
 
   const nav = (
     <>
@@ -41,7 +45,7 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen bg-pearl">
-      <header className="sticky top-0 z-50 border-b border-roseGold/10 bg-pearl/90 backdrop-blur-xl">
+      {!isAdminArea ? <header className="sticky top-0 z-[1000] border-b border-roseGold/10 bg-pearl/90 backdrop-blur-xl">
         <div className="container-pad flex h-20 items-center justify-between gap-4">
           <Link to="/" className="flex items-center" aria-label="Bornil Vibes home">
             <img src={logo} alt="Bornil Vibes" className="h-16 w-auto object-contain md:h-20" />
@@ -61,12 +65,12 @@ export default function MainLayout() {
             )}
           </div>
 
-          <button className="grid h-11 w-11 place-items-center rounded-full bg-white md:hidden" onClick={() => setOpen((value) => !value)} type="button" aria-label="Menu">
+          <button className="relative z-[1002] grid h-11 w-11 place-items-center rounded-full bg-white md:hidden" onClick={() => setOpen((value) => !value)} type="button" aria-label="Menu">
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
         {open ? (
-          <div className="border-t border-roseGold/10 bg-white md:hidden">
+          <div className="absolute left-0 right-0 top-full z-[1001] border-t border-roseGold/10 bg-white shadow-soft md:hidden">
             <div className="container-pad flex flex-col gap-5 py-5">
               {nav}
               <Link to="/cart" onClick={() => setOpen(false)} className="text-sm font-bold">Cart ({count})</Link>
@@ -74,13 +78,13 @@ export default function MainLayout() {
             </div>
           </div>
         ) : null}
-      </header>
+      </header> : null}
 
       <main>
         <Outlet />
       </main>
 
-      <footer className="mt-20 border-t border-roseGold/10 bg-white">
+      {!isAdminArea ? <footer className="mt-20 border-t border-roseGold/10 bg-white">
         <div className="container-pad grid gap-8 py-10 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <h3 className="font-display text-2xl font-bold">Bornil Vibes</h3>
@@ -101,7 +105,7 @@ export default function MainLayout() {
             <p className="mt-3 text-sm leading-6 text-ink/65">Dhaka, Bangladesh<br />support@bornilvibes.com</p>
           </div>
         </div>
-      </footer>
+      </footer> : null}
     </div>
   );
 }
