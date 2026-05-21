@@ -46,6 +46,9 @@ export type User = {
   phone: string;
   email?: string;
   role: Role;
+  status?: 'active' | 'blocked';
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type AuthResponse = {

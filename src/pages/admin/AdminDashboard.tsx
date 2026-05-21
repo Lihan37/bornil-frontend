@@ -2,20 +2,23 @@ import { useQuery } from '@tanstack/react-query';
 import AdminShell from './AdminShell';
 import { getOrders } from '../../services/orderService';
 import { getProducts } from '../../services/productService';
+import { getAdminUsers } from '../../services/userService';
 import { formatPrice } from '../../utils/format';
 
 export default function AdminDashboard() {
   const { data } = useQuery({ queryKey: ['admin-products'], queryFn: () => getProducts({ limit: 48 }) });
   const products = data?.products || [];
   const { data: orders = [] } = useQuery({ queryKey: ['admin-orders'], queryFn: getOrders });
+  const { data: users = [] } = useQuery({ queryKey: ['admin-users'], queryFn: getAdminUsers });
   const revenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
 
   return (
     <AdminShell title="Dashboard">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
           ['Products', products.length.toString()],
           ['Orders', orders.length.toString()],
+          ['Users', users.length.toString()],
           ['Revenue', formatPrice(revenue)],
         ].map(([label, value]) => (
           <div key={label} className="rounded-3xl border border-roseGold/10 bg-white p-6 shadow-sm">
