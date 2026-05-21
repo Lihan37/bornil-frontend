@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -20,6 +21,7 @@ type AuthForm = z.infer<typeof authSchema>;
 export default function LoginRegister() {
   const location = useLocation();
   const [mode, setMode] = useState<'login' | 'register'>(location.pathname === '/signup' ? 'register' : 'login');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const { register, handleSubmit, formState: { errors } } = useForm<AuthForm>({ resolver: zodResolver(authSchema) });
@@ -67,7 +69,17 @@ export default function LoginRegister() {
           ) : null}
           <div>
             <label className="label">Password</label>
-            <input className="field" type="password" {...register('password')} />
+            <div className="relative">
+              <input className="field pr-12" type={showPassword ? 'text' : 'password'} {...register('password')} />
+              <button
+                type="button"
+                onClick={() => setShowPassword((value) => !value)}
+                className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-ink/55 transition hover:bg-pearl hover:text-roseGold"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             {errors.password ? <p className="mt-1 text-sm text-red-500">{errors.password.message}</p> : null}
           </div>
           <button className="btn-primary mt-2 w-full" disabled={mutation.isPending} type="submit">
