@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom';
-import { BarChart3, ClipboardList, PackagePlus, Settings } from 'lucide-react';
+import { BarChart3, ClipboardList, FolderTree, PackagePlus, Settings } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 
@@ -7,6 +7,7 @@ const adminLinks = [
   { label: 'Dashboard', href: '/admin', icon: BarChart3 },
   { label: 'Add Product', href: '/admin/add-product', icon: PackagePlus },
   { label: 'Manage Products', href: '/admin/products', icon: Settings },
+  { label: 'Categories', href: '/admin/categories', icon: FolderTree },
   { label: 'Orders', href: '/admin/orders', icon: ClipboardList },
 ];
 

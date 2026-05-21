@@ -5,6 +5,7 @@ import { useCartStore } from '../store/cartStore';
 import type { Product } from '../types';
 import { formatPrice } from '../utils/format';
 import { handleImageError } from '../utils/imageFallback';
+import { productImage } from '../utils/productImage';
 
 export default function ProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((state) => state.addItem);
@@ -19,7 +20,7 @@ export default function ProductCard({ product }: { product: Product }) {
     <article className="group overflow-hidden rounded-3xl border border-roseGold/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-soft">
       <Link to={`/products/${product._id}`} className="block overflow-hidden bg-blush">
         <img
-          src={product.images[0]}
+          src={productImage(product)}
           alt={product.name}
           onError={handleImageError}
           className="aspect-[4/5] w-full object-cover transition duration-500 group-hover:scale-105"

@@ -1,73 +1,39 @@
 import { api } from './api';
-import { fallbackProducts } from '../data/mockData';
-import type { Product, ProductFilters } from '../types';
-
-const normalizeProducts = (products: Product[], filters?: ProductFilters) => {
-  let result = [...products];
-  const search = filters?.search?.trim().toLowerCase();
-
-  if (search) {
-    result = result.filter((product) => product.name.toLowerCase().includes(search));
-  }
-  if (filters?.category) {
-    result = result.filter((product) => product.category === filters.category);
-  }
-  if (filters?.availability === 'in-stock') {
-    result = result.filter((product) => product.stock > 0);
-  }
-  if (filters?.availability === 'out-of-stock') {
-    result = result.filter((product) => product.stock === 0);
-  }
-  if (filters?.minPrice) {
-    result = result.filter((product) => product.price >= Number(filters.minPrice));
-  }
-  if (filters?.maxPrice) {
-    result = result.filter((product) => product.price <= Number(filters.maxPrice));
-  }
-  if (filters?.sort === 'price-low-high') {
-    result.sort((a, b) => a.price - b.price);
-  }
-  if (filters?.sort === 'price-high-low') {
-    result.sort((a, b) => b.price - a.price);
-  }
-  if (filters?.sort === 'newest') {
-    result.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
-  }
-
-  return result;
-};
+import type { ApiResponse, PaginatedProducts, Product, ProductFilters } from '../types';
 
 export async function getProducts(filters?: ProductFilters) {
-  try {
-    const { data } = await api.get<Product[]>('/products', { params: filters });
-    return data;
-  } catch {
-    return normalizeProducts(fallbackProducts, filters);
-  }
+  const { data } = await api.get<ApiResponse<Product[]>>('/products', { params: filters });
+  return {
+    products: data.data,
+    meta: data.meta || { page: 1, limit: data.data.length, total: data.data.length, totalPages: 1 },
+  } satisfies PaginatedProducts;
 }
 
 export async function getProduct(id: string) {
-  try {
-    const { data } = await api.get<Product>(`/products/${id}`);
-    return data;
-  } catch {
-    const product = fallbackProducts.find((item) => item._id === id || item.slug === id);
-    if (!product) throw new Error('Product not found');
-    return product;
-  }
+  const { data } = await api.get<ApiResponse<Product>>(`/products/${id}`);
+  return data.data;
 }
 
-export async function createProduct(payload: Omit<Product, '_id'>) {
-  const { data } = await api.post<Product>('/products', payload);
-  return data;
+export async function getProductBySlug(slug: string) {
+  const { data } = await api.get<ApiResponse<Product>>(`/products/slug/${slug}`);
+  return data.data;
 }
 
-export async function updateProduct(id: string, payload: Partial<Product>) {
-  const { data } = await api.put<Product>(`/products/${id}`, payload);
-  return data;
+export async function createProduct(payload: FormData) {
+  const { data } = await api.post<ApiResponse<Product>>('/products/admin', payload, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data.data;
+}
+
+export async function updateProduct(id: string, payload: FormData) {
+  const { data } = await api.patch<ApiResponse<Product>>(`/products/admin/${id}`, payload, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data.data;
 }
 
 export async function deleteProduct(id: string) {
-  const { data } = await api.delete<{ message: string }>(`/products/${id}`);
+  const { data } = await api.delete<ApiResponse<null>>(`/products/admin/${id}`);
   return data;
 }

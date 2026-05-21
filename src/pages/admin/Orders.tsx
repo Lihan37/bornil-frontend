@@ -33,10 +33,10 @@ export default function Orders() {
                 <p className="mt-1 text-sm text-ink/60">{order.phone} · {order.address}</p>
               </div>
               <div className="text-left md:text-right">
-                <p className="text-xl font-extrabold">{formatPrice(order.total)}</p>
+                <p className="text-xl font-extrabold">{formatPrice(order.totalAmount)}</p>
                 <select
                   className="field mt-2 min-w-44"
-                  value={order.status}
+                  value={order.orderStatus}
                   onChange={(event) => mutation.mutate({ id: order._id, status: event.target.value as OrderStatus })}
                 >
                   {statuses.map((status) => <option key={status} value={status}>{status}</option>)}

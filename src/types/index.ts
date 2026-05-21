@@ -13,18 +13,26 @@ export type Category =
 export type Product = {
   _id: string;
   name: string;
-  slug?: string;
+  slug: string;
   price: number;
+  oldPrice?: number;
   category: Category;
   description: string;
-  images: string[];
+  images: ProductImage[];
   material: string;
   color: string;
   size: string;
   stock: number;
-  featured?: boolean;
-  bestSelling?: boolean;
+  isFeatured: boolean;
+  isBestSelling: boolean;
+  status: 'active' | 'draft' | 'archived';
   createdAt?: string;
+  updatedAt?: string;
+};
+
+export type ProductImage = {
+  url: string;
+  publicId: string;
 };
 
 export type CartItem = {
@@ -35,7 +43,8 @@ export type CartItem = {
 export type User = {
   _id: string;
   name: string;
-  email: string;
+  phone: string;
+  email?: string;
   role: Role;
 };
 
@@ -44,22 +53,27 @@ export type AuthResponse = {
   user: User;
 };
 
-export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export type Order = {
   _id: string;
+  userId?: string;
   customerName: string;
   phone: string;
   address: string;
-  paymentMethod: 'cash-on-delivery' | 'bkash' | 'nagad' | 'card';
+  paymentMethod: 'cash_on_delivery';
   items: Array<{
-    product: Product | string;
+    productId: string;
+    name: string;
+    slug: string;
+    image?: string;
     quantity: number;
     price: number;
   }>;
-  total: number;
-  status: OrderStatus;
+  totalAmount: number;
+  orderStatus: OrderStatus;
   createdAt: string;
+  updatedAt: string;
 };
 
 export type ProductFilters = {
@@ -69,4 +83,25 @@ export type ProductFilters = {
   maxPrice?: string;
   availability?: string;
   sort?: string;
+  page?: number;
+  limit?: number;
+  featured?: string;
+  bestSelling?: string;
+};
+
+export type ApiResponse<T> = {
+  success: boolean;
+  message: string;
+  data: T;
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+export type PaginatedProducts = {
+  products: Product[];
+  meta: NonNullable<ApiResponse<Product[]>['meta']>;
 };

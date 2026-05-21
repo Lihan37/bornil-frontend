@@ -3,15 +3,17 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import SectionHeader from '../components/SectionHeader';
-import { categories } from '../data/mockData';
+import { getCategories } from '../services/categoryService';
 import { getProducts } from '../services/productService';
 import { handleImageError } from '../utils/imageFallback';
 
 export default function Home() {
-  const { data: products = [] } = useQuery({ queryKey: ['products', 'home'], queryFn: () => getProducts({ sort: 'newest' }) });
-  const featured = products.filter((product) => product.featured).slice(0, 4);
-  const bestSelling = products.filter((product) => product.bestSelling).slice(0, 4);
-  const arrivals = [...products].slice(0, 4);
+  const { data } = useQuery({ queryKey: ['products', 'home'], queryFn: () => getProducts({ sort: 'newest', limit: 8 }) });
+  const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: getCategories });
+  const products = data?.products || [];
+  const featured = products.filter((product) => product.isFeatured).slice(0, 4);
+  const bestSelling = products.filter((product) => product.isBestSelling).slice(0, 4);
+  const arrivals = products.slice(0, 4);
 
   return (
     <>
@@ -51,9 +53,9 @@ export default function Home() {
       <section className="container-pad py-10">
         <SectionHeader eyebrow="Categories" title="Shop by jewelry style" description="Choose your favorite category and find pieces that match your outfit, event, and mood." />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {categories.map((category) => (
-            <Link key={category} to={`/products?category=${encodeURIComponent(category)}`} className="rounded-3xl border border-roseGold/10 bg-white p-5 font-display text-xl font-bold transition hover:border-roseGold hover:text-roseGold">
-              {category}
+          {categories.filter((category) => category.isFeatured).slice(0, 8).map((category) => (
+            <Link key={category._id} to={`/products?category=${encodeURIComponent(category.name)}`} className="rounded-3xl border border-roseGold/10 bg-white p-5 font-display text-xl font-bold transition hover:border-roseGold hover:text-roseGold">
+              {category.name}
             </Link>
           ))}
         </div>

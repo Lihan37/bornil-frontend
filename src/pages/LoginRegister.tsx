@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { login, register as registerUser } from '../services/authService';
@@ -10,20 +10,25 @@ import { useAuthStore } from '../store/authStore';
 
 const authSchema = z.object({
   name: z.string().optional(),
-  email: z.string().email('Enter a valid email'),
+  phone: z.string().regex(/^01[0-9]{9}$/, 'Use a valid Bangladesh phone number'),
+  email: z.string().email('Enter a valid email').optional().or(z.literal('')),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 type AuthForm = z.infer<typeof authSchema>;
 
 export default function LoginRegister() {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const location = useLocation();
+  const [mode, setMode] = useState<'login' | 'register'>(location.pathname === '/signup' ? 'register' : 'login');
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const { register, handleSubmit, formState: { errors } } = useForm<AuthForm>({ resolver: zodResolver(authSchema) });
 
   const mutation = useMutation({
-    mutationFn: (values: AuthForm) => mode === 'login' ? login(values) : registerUser({ name: values.name || '', email: values.email, password: values.password }),
+    mutationFn: (values: AuthForm) =>
+      mode === 'login'
+        ? login({ phone: values.phone, password: values.password })
+        : registerUser({ name: values.name || '', phone: values.phone, email: values.email || undefined, password: values.password }),
     onSuccess: (data) => {
       setAuth(data.token, data.user);
       toast.success(mode === 'login' ? 'Logged in successfully' : 'Account created');
@@ -49,10 +54,17 @@ export default function LoginRegister() {
             </div>
           ) : null}
           <div>
-            <label className="label">Email</label>
-            <input className="field" type="email" {...register('email')} />
-            {errors.email ? <p className="mt-1 text-sm text-red-500">{errors.email.message}</p> : null}
+            <label className="label">Phone</label>
+            <input className="field" {...register('phone')} />
+            {errors.phone ? <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p> : null}
           </div>
+          {mode === 'register' ? (
+            <div>
+              <label className="label">Email optional</label>
+              <input className="field" type="email" {...register('email')} />
+              {errors.email ? <p className="mt-1 text-sm text-red-500">{errors.email.message}</p> : null}
+            </div>
+          ) : null}
           <div>
             <label className="label">Password</label>
             <input className="field" type="password" {...register('password')} />

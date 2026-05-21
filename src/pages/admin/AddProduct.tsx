@@ -1,34 +1,43 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import type { ReactNode } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import AdminShell from './AdminShell';
-import { categories } from '../../data/mockData';
+import { getCategories } from '../../services/categoryService';
 import { createProduct } from '../../services/productService';
 
 const productSchema = z.object({
   name: z.string().min(2),
   price: z.coerce.number().min(1),
-  category: z.enum(['Earrings', 'Necklaces', 'Rings', 'Bracelets', 'Bangles', 'Anklets', 'Hair Accessories', 'Bridal Jewelry']),
+  category: z.string().min(2, 'Category is required'),
   description: z.string().min(10),
-  imageUrl: z.string().url(),
+  images: z.custom<FileList>((files) => files instanceof FileList && files.length > 0, 'At least one image is required'),
   material: z.string().min(2),
   color: z.string().min(2),
   size: z.string().min(1),
   stock: z.coerce.number().min(0),
-  featured: z.boolean().optional(),
-  bestSelling: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
+  isBestSelling: z.boolean().optional(),
 });
 
 type ProductForm = z.infer<typeof productSchema>;
 
 export default function AddProduct() {
   const queryClient = useQueryClient();
+  const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: getCategories });
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProductForm>({ resolver: zodResolver(productSchema) });
   const mutation = useMutation({
-    mutationFn: (values: ProductForm) => createProduct({ ...values, images: [values.imageUrl], createdAt: new Date().toISOString() }),
+    mutationFn: (values: ProductForm) => {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        if (key !== 'images' && value !== undefined) formData.append(key, String(value));
+      });
+      Array.from(values.images).forEach((file) => formData.append('images', file));
+      return createProduct(formData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       toast.success('Product added');
@@ -45,10 +54,10 @@ export default function AddProduct() {
           <Field label="Price" error={errors.price?.message}><input className="field" type="number" {...register('price')} /></Field>
           <Field label="Category" error={errors.category?.message}>
             <select className="field" {...register('category')}>
-              {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+              {categories.map((category) => <option key={category._id} value={category.name}>{category.name}</option>)}
             </select>
           </Field>
-          <Field label="Image URL" error={errors.imageUrl?.message}><input className="field" {...register('imageUrl')} /></Field>
+          <Field label="Product images" error={errors.images?.message}><input className="field" type="file" accept="image/*" multiple {...register('images')} /></Field>
           <Field label="Material" error={errors.material?.message}><input className="field" {...register('material')} /></Field>
           <Field label="Color" error={errors.color?.message}><input className="field" {...register('color')} /></Field>
           <Field label="Size" error={errors.size?.message}><input className="field" {...register('size')} /></Field>
@@ -56,8 +65,8 @@ export default function AddProduct() {
           <div className="md:col-span-2">
             <Field label="Description" error={errors.description?.message}><textarea className="field min-h-32" {...register('description')} /></Field>
           </div>
-          <label className="flex items-center gap-3 rounded-2xl bg-pearl p-4 text-sm font-bold"><input type="checkbox" {...register('featured')} /> Featured</label>
-          <label className="flex items-center gap-3 rounded-2xl bg-pearl p-4 text-sm font-bold"><input type="checkbox" {...register('bestSelling')} /> Best selling</label>
+          <label className="flex items-center gap-3 rounded-2xl bg-pearl p-4 text-sm font-bold"><input type="checkbox" {...register('isFeatured')} /> Featured</label>
+          <label className="flex items-center gap-3 rounded-2xl bg-pearl p-4 text-sm font-bold"><input type="checkbox" {...register('isBestSelling')} /> Best selling</label>
         </div>
         <button className="btn-primary mt-6" disabled={mutation.isPending} type="submit">{mutation.isPending ? 'Saving...' : 'Add product'}</button>
       </form>

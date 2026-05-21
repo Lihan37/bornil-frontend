@@ -10,9 +10,9 @@ import { formatPrice } from '../utils/format';
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, 'Name is required'),
-  phone: z.string().min(8, 'Phone number is required'),
+  phone: z.string().regex(/^01[0-9]{9}$/, 'Use a valid Bangladesh phone number'),
   address: z.string().min(8, 'Full delivery address is required'),
-  paymentMethod: z.enum(['cash-on-delivery', 'bkash', 'nagad', 'card']),
+  paymentMethod: z.literal('cash_on_delivery'),
 });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
@@ -23,7 +23,7 @@ export default function Checkout() {
   const total = selectCartTotal(items);
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { paymentMethod: 'cash-on-delivery' },
+    defaultValues: { paymentMethod: 'cash_on_delivery' },
   });
 
   const mutation = useMutation({
@@ -39,8 +39,7 @@ export default function Checkout() {
   const onSubmit = (values: CheckoutForm) => {
     mutation.mutate({
       ...values,
-      total: total + 120,
-      items: items.map(({ product, quantity }) => ({ product: product._id, quantity, price: product.price })),
+      items: items.map(({ product, quantity }) => ({ productId: product._id, quantity })),
     });
   };
 
@@ -67,10 +66,7 @@ export default function Checkout() {
           <div>
             <label className="label">Payment method</label>
             <select className="field" {...register('paymentMethod')}>
-              <option value="cash-on-delivery">Cash on delivery</option>
-              <option value="bkash">bKash</option>
-              <option value="nagad">Nagad</option>
-              <option value="card">Card</option>
+              <option value="cash_on_delivery">Cash on delivery</option>
             </select>
           </div>
         </div>

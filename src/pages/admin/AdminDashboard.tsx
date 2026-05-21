@@ -5,9 +5,10 @@ import { getProducts } from '../../services/productService';
 import { formatPrice } from '../../utils/format';
 
 export default function AdminDashboard() {
-  const { data: products = [] } = useQuery({ queryKey: ['admin-products'], queryFn: () => getProducts() });
+  const { data } = useQuery({ queryKey: ['admin-products'], queryFn: () => getProducts({ limit: 48 }) });
+  const products = data?.products || [];
   const { data: orders = [] } = useQuery({ queryKey: ['admin-orders'], queryFn: getOrders });
-  const revenue = orders.reduce((sum, order) => sum + order.total, 0);
+  const revenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
 
   return (
     <AdminShell title="Dashboard">
@@ -39,8 +40,8 @@ export default function AdminDashboard() {
               {orders.slice(0, 5).map((order) => (
                 <tr key={order._id}>
                   <td className="py-4 font-bold">{order.customerName}</td>
-                  <td>{formatPrice(order.total)}</td>
-                  <td className="capitalize">{order.status}</td>
+                  <td>{formatPrice(order.totalAmount)}</td>
+                  <td className="capitalize">{order.orderStatus}</td>
                   <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}

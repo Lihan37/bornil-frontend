@@ -6,7 +6,7 @@ import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import ProductCard from '../components/ProductCard';
 import SectionHeader from '../components/SectionHeader';
-import { categories } from '../data/mockData';
+import { getCategories } from '../services/categoryService';
 import { getProducts } from '../services/productService';
 import type { ProductFilters } from '../types';
 
@@ -18,7 +18,9 @@ export default function Products() {
   });
 
   const queryKey = useMemo(() => ['products', filters], [filters]);
-  const { data: products = [], isLoading, isError } = useQuery({ queryKey, queryFn: () => getProducts(filters) });
+  const { data, isLoading, isError } = useQuery({ queryKey, queryFn: () => getProducts({ ...filters, limit: 12 }) });
+  const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: getCategories });
+  const products = data?.products || [];
 
   const updateFilter = (key: keyof ProductFilters, value: string) => setFilters((current) => ({ ...current, [key]: value }));
 
@@ -34,7 +36,7 @@ export default function Products() {
           </label>
           <select className="field" value={filters.category || ''} onChange={(event) => updateFilter('category', event.target.value)}>
             <option value="">All categories</option>
-            {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+            {categories.map((category) => <option key={category._id} value={category.name}>{category.name}</option>)}
           </select>
           <select className="field" value={filters.availability || ''} onChange={(event) => updateFilter('availability', event.target.value)}>
             <option value="">Any availability</option>
@@ -59,6 +61,15 @@ export default function Products() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {products.map((product) => <ProductCard key={product._id} product={product} />)}
       </div>
+      {data?.meta && data.meta.totalPages > 1 ? (
+        <div className="mt-8 flex justify-center gap-2">
+          {Array.from({ length: data.meta.totalPages }, (_, index) => index + 1).map((page) => (
+            <button key={page} type="button" onClick={() => setFilters((current) => ({ ...current, page }))} className={filters.page === page || (!filters.page && page === 1) ? 'h-10 min-w-10 rounded-full bg-ink px-3 font-bold text-white' : 'h-10 min-w-10 rounded-full bg-white px-3 font-bold'}>
+              {page}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

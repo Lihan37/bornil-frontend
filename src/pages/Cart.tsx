@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCartStore, selectCartTotal } from '../store/cartStore';
 import { formatPrice } from '../utils/format';
 import { handleImageError } from '../utils/imageFallback';
+import { productImage } from '../utils/productImage';
 
 export default function Cart() {
   const { items, updateQuantity, removeItem } = useCartStore();
@@ -27,7 +28,7 @@ export default function Cart() {
         <div className="mt-6 grid gap-4">
           {items.map(({ product, quantity }) => (
             <div key={product._id} className="grid gap-4 rounded-3xl border border-roseGold/10 bg-white p-4 shadow-sm sm:grid-cols-[120px_1fr_auto] sm:items-center">
-              <img src={product.images[0]} alt={product.name} onError={handleImageError} className="h-32 w-full rounded-2xl object-cover sm:h-28" />
+              <img src={productImage(product)} alt={product.name} onError={handleImageError} className="h-32 w-full rounded-2xl object-cover sm:h-28" />
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-roseGold">{product.category}</p>
                 <h2 className="mt-1 font-display text-2xl font-bold">{product.name}</h2>

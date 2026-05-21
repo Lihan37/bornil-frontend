@@ -31,6 +31,11 @@ export default function MainLayout() {
           Admin
         </NavLink>
       ) : null}
+      {user && user.role !== 'admin' ? (
+        <NavLink to="/dashboard" className={({ isActive }) => cn('text-sm font-bold transition hover:text-roseGold', isActive && 'text-roseGold')} onClick={() => setOpen(false)}>
+          Dashboard
+        </NavLink>
+      ) : null}
     </>
   );
 

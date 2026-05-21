@@ -5,10 +5,12 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
-import { getProduct } from '../services/productService';
+import ProductCard from '../components/ProductCard';
+import { getProduct, getProducts } from '../services/productService';
 import { useCartStore } from '../store/cartStore';
 import { formatPrice } from '../utils/format';
 import { handleImageError } from '../utils/imageFallback';
+import { productImage } from '../utils/productImage';
 
 export default function ProductDetails() {
   const { id = '' } = useParams();
@@ -16,11 +18,16 @@ export default function ProductDetails() {
   const [activeImage, setActiveImage] = useState(0);
   const addItem = useCartStore((state) => state.addItem);
   const { data: product, isLoading, isError } = useQuery({ queryKey: ['product', id], queryFn: () => getProduct(id), enabled: Boolean(id) });
+  const { data: relatedData } = useQuery({
+    queryKey: ['related-products', product?.category, product?._id],
+    queryFn: () => getProducts({ category: product!.category, limit: 4 }),
+    enabled: Boolean(product?.category),
+  });
 
   if (isLoading) return <section className="container-pad py-10"><LoadingState /></section>;
   if (isError || !product) return <section className="container-pad py-10"><ErrorState message="Product not found." /></section>;
 
-  const images = product.images.length ? product.images : [product.images[0]];
+  const images = product.images.length ? product.images.map((image) => image.url) : [productImage(product)];
 
   const handleAdd = () => {
     addItem(product, quantity);
@@ -28,8 +35,9 @@ export default function ProductDetails() {
   };
 
   return (
-    <section className="container-pad grid gap-10 py-10 lg:grid-cols-[1fr_0.9fr]">
-      <div>
+    <section className="container-pad py-10">
+      <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr]">
+        <div>
         <div className="overflow-hidden rounded-[2rem] bg-blush">
           <img src={images[activeImage]} alt={product.name} onError={handleImageError} className="aspect-square w-full object-cover" />
         </div>
@@ -40,9 +48,9 @@ export default function ProductDetails() {
             </button>
           ))}
         </div>
-      </div>
+        </div>
 
-      <div className="rounded-[2rem] border border-roseGold/10 bg-white p-6 shadow-sm lg:p-8">
+        <div className="rounded-[2rem] border border-roseGold/10 bg-white p-6 shadow-sm lg:p-8">
         <p className="text-xs font-bold uppercase tracking-[0.24em] text-roseGold">{product.category}</p>
         <h1 className="mt-3 font-display text-4xl font-bold leading-tight">{product.name}</h1>
         <p className="mt-4 text-3xl font-extrabold">{formatPrice(product.price)}</p>
@@ -76,7 +84,18 @@ export default function ProductDetails() {
             <ShoppingBag size={18} /> Add to cart
           </button>
         </div>
+        </div>
       </div>
+      {relatedData?.products.length ? (
+        <div className="mt-16">
+          <h2 className="font-display text-3xl font-bold">Related pieces</h2>
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {relatedData.products.filter((item) => item._id !== product._id).slice(0, 4).map((item) => (
+              <ProductCard key={item._id} product={item} />
+            ))}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
