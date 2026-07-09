@@ -43,10 +43,14 @@ export default function Checkout() {
     });
   };
 
+  const DELIVERY = 120;
+
   return (
-    <section className="container-pad grid gap-8 py-10 lg:grid-cols-[1fr_380px]">
-      <form onSubmit={handleSubmit(onSubmit)} className="rounded-[2rem] border border-roseGold/10 bg-white p-6 shadow-sm">
+    <section className="container-pad grid gap-8 py-12 lg:grid-cols-[1fr_380px]">
+      <form onSubmit={handleSubmit(onSubmit)} className="rounded-4xl border border-roseGold/10 bg-white/90 p-6 shadow-soft backdrop-blur-sm sm:p-8">
+        <p className="eyebrow mb-2">Almost there</p>
         <h1 className="font-display text-4xl font-bold">Checkout</h1>
+        <p className="mt-1 text-sm text-ink/50">Enter your delivery details — pay with cash when it arrives.</p>
         <div className="mt-6 grid gap-5">
           <div>
             <label className="label">Customer name</label>
@@ -75,19 +79,23 @@ export default function Checkout() {
         </button>
       </form>
 
-      <aside className="h-fit rounded-[2rem] border border-roseGold/10 bg-white p-6 shadow-soft">
-        <h2 className="font-display text-3xl font-bold">Your items</h2>
-        <div className="mt-5 space-y-4">
+      <aside className="h-fit rounded-4xl border border-roseGold/10 bg-white/90 p-6 shadow-soft backdrop-blur-sm lg:sticky lg:top-28">
+        <h2 className="font-display text-2xl font-bold">Your items</h2>
+        <div className="mt-5 space-y-3.5">
           {items.map(({ product, quantity }) => (
-            <div key={product._id} className="flex justify-between gap-4 text-sm">
-              <span>{product.name} x {quantity}</span>
-              <span className="font-bold">{formatPrice(product.price * quantity)}</span>
+            <div key={product._id} className="flex justify-between gap-4 text-sm text-ink/70">
+              <span>{product.name} <span className="text-ink/40">× {quantity}</span></span>
+              <span className="font-bold text-ink">{formatPrice(product.price * quantity)}</span>
             </div>
           ))}
         </div>
-        <div className="mt-5 border-t border-roseGold/10 pt-4 text-lg font-extrabold flex justify-between">
-          <span>Total</span>
-          <span>{formatPrice(total + 120)}</span>
+        <div className="mt-5 space-y-2 border-t border-roseGold/10 pt-4 text-sm text-ink/70">
+          <div className="flex justify-between"><span>Subtotal</span><span className="font-bold text-ink">{formatPrice(total)}</span></div>
+          <div className="flex justify-between"><span>Delivery</span><span className="font-bold text-ink">{formatPrice(items.length ? DELIVERY : 0)}</span></div>
+        </div>
+        <div className="mt-3 flex items-baseline justify-between border-t border-roseGold/10 pt-4">
+          <span className="font-bold">Total</span>
+          <span className="text-2xl font-extrabold text-gilded">{formatPrice(total + DELIVERY)}</span>
         </div>
       </aside>
     </section>

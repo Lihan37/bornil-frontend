@@ -31,13 +31,13 @@ export default function ManageUsers() {
 
   return (
     <AdminShell title="Users">
-      {isLoading ? <LoadingState /> : null}
+      {isLoading ? <LoadingState label="Loading users…" /> : null}
       <div className="grid gap-4">
         {users.map((user) => {
           const isSelf = user._id === currentUser?._id;
           const status = user.status || 'active';
           return (
-            <article key={user._id} className="rounded-3xl border border-roseGold/10 bg-white p-4 shadow-sm">
+            <article key={user._id} className="rounded-3xl border border-roseGold/10 bg-white/90 p-4 shadow-[0_18px_40px_-30px_rgba(74,40,48,0.5)] backdrop-blur-sm transition hover:border-roseGold/25">
               <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_auto] lg:items-center">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">

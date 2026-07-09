@@ -48,7 +48,7 @@ export default function AddProduct() {
 
   return (
     <AdminShell title="Add product">
-      <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="rounded-[2rem] border border-roseGold/10 bg-white p-6 shadow-sm">
+      <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="rounded-4xl border border-roseGold/10 bg-white/90 p-6 shadow-soft backdrop-blur-sm sm:p-8">
         <div className="grid gap-5 md:grid-cols-2">
           <Field label="Product name" error={errors.name?.message}><input className="field" {...register('name')} /></Field>
           <Field label="Price" error={errors.price?.message}><input className="field" type="number" {...register('price')} /></Field>

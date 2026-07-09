@@ -49,13 +49,15 @@ export default function LoginRegister() {
   });
 
   return (
-    <section className="container-pad grid min-h-[70vh] place-items-center py-10">
-      <div className="w-full max-w-md rounded-[2rem] border border-roseGold/10 bg-white p-6 shadow-soft">
-        <p className="text-xs font-bold uppercase tracking-[0.24em] text-roseGold">Bornil Vibes</p>
+    <section className="container-pad grid min-h-[70vh] place-items-center py-12">
+      <div className="animate-fade-scale w-full max-w-md rounded-[2rem] border border-roseGold/10 bg-white/90 p-7 shadow-lux backdrop-blur-sm sm:p-8">
+        <p className="eyebrow">Bornil Vibes</p>
         <h1 className="mt-3 font-display text-4xl font-bold">{mode === 'login' ? 'Welcome back' : 'Create account'}</h1>
-        <div className="mt-6 grid grid-cols-2 rounded-full bg-pearl p-1">
-          <button className={mode === 'login' ? 'rounded-full bg-ink px-4 py-2 text-sm font-bold text-white' : 'px-4 py-2 text-sm font-bold'} onClick={() => setMode('login')} type="button">Login</button>
-          <button className={mode === 'register' ? 'rounded-full bg-ink px-4 py-2 text-sm font-bold text-white' : 'px-4 py-2 text-sm font-bold'} onClick={() => setMode('register')} type="button">Register</button>
+        <p className="mt-2 text-sm text-ink/55">{mode === 'login' ? 'Sign in to continue to your account.' : 'Join us for early access to one-of-one drops.'}</p>
+        <div className="relative mt-6 grid grid-cols-2 rounded-full bg-pearl p-1">
+          <span className={`absolute top-1 bottom-1 w-[calc(50%-0.25rem)] rounded-full bg-ink shadow-soft transition-transform duration-300 ${mode === 'register' ? 'translate-x-full' : 'translate-x-0'}`} />
+          <button className={`relative z-10 rounded-full px-4 py-2 text-sm font-bold transition-colors ${mode === 'login' ? 'text-white' : 'text-ink/60'}`} onClick={() => setMode('login')} type="button">Login</button>
+          <button className={`relative z-10 rounded-full px-4 py-2 text-sm font-bold transition-colors ${mode === 'register' ? 'text-white' : 'text-ink/60'}`} onClick={() => setMode('register')} type="button">Register</button>
         </div>
         <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="mt-6 grid gap-4">
           {mode === 'register' ? (

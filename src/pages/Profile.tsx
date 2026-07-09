@@ -32,10 +32,18 @@ export default function Profile() {
 
   return (
     <section className="container-pad grid min-h-[60vh] place-items-center py-10">
-      <form onSubmit={handleSubmit((values) => mutation.mutate({ name: values.name, email: values.email || undefined }))} className="w-full max-w-xl rounded-[2rem] border border-roseGold/10 bg-white p-6 shadow-soft">
-        <h1 className="font-display text-4xl font-bold">Profile</h1>
-        <p className="mt-2 text-sm text-ink/60">Phone: {user?.phone}</p>
-        <div className="mt-6 grid gap-4">
+      <form onSubmit={handleSubmit((values) => mutation.mutate({ name: values.name, email: values.email || undefined }))} className="w-full max-w-xl rounded-[2rem] border border-roseGold/10 bg-white/90 p-7 shadow-lux backdrop-blur-sm sm:p-8">
+        <div className="flex items-center gap-4">
+          <div className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-linear-to-br from-champagne to-goldLight font-display text-2xl font-bold text-ink">
+            {(user?.name || 'B').charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <h1 className="font-display text-3xl font-bold">{user?.name || 'Profile'}</h1>
+            <p className="mt-1 text-sm text-ink/55">Phone: {user?.phone}</p>
+          </div>
+        </div>
+        <div className="my-6 hairline" />
+        <div className="grid gap-4">
           <div>
             <label className="label">Name</label>
             <input className="field" {...register('name')} />

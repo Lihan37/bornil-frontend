@@ -21,9 +21,9 @@ export default function AdminShell({ title, children }: { title: string; childre
 
   return (
     <section className="min-h-screen bg-pearl lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="sticky top-0 z-[1000] border-b border-roseGold/10 bg-white/95 p-3 shadow-sm backdrop-blur lg:min-h-screen lg:border-b-0 lg:border-r lg:p-5">
+      <aside className="sticky top-0 z-1000 border-b border-roseGold/10 bg-white/95 p-3 shadow-sm backdrop-blur lg:min-h-screen lg:border-b-0 lg:border-r lg:p-5">
         <div className="flex items-center justify-between gap-3 lg:block">
-          <Link to="/admin" className="px-2 font-display text-2xl font-bold">Admin</Link>
+          <Link to="/admin" className="px-2 font-display text-2xl font-bold text-gilded">Bornil Admin</Link>
           <div className="flex items-center gap-2 lg:hidden">
             <button
               onClick={() => setMenuOpen((value) => !value)}
@@ -43,14 +43,14 @@ export default function AdminShell({ title, children }: { title: string; childre
             </button>
           </div>
         </div>
-        <nav className={cn('absolute left-0 right-0 top-full z-[1001] grid gap-2 border-t border-roseGold/10 bg-white p-3 shadow-soft lg:static lg:mt-4 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none', menuOpen ? 'grid' : 'hidden lg:grid')}>
+        <nav className={cn('absolute left-0 right-0 top-full z-1001 grid gap-2 border-t border-roseGold/10 bg-white p-3 shadow-soft lg:static lg:mt-4 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none', menuOpen ? 'grid' : 'hidden lg:grid')}>
           {adminLinks.map((item) => (
             <NavLink
               key={item.href}
               to={item.href}
               end={item.end || item.href === '/admin'}
               onClick={() => setMenuOpen(false)}
-              className={({ isActive }) => cn('flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-ink/70 transition hover:bg-pearl hover:text-ink', isActive && 'bg-ink text-white hover:bg-ink hover:text-white')}
+              className={({ isActive }) => cn('flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-ink/70 transition hover:bg-blush/60 hover:text-ink', isActive && 'bg-ink text-white shadow-soft hover:bg-ink hover:text-white')}
             >
               <item.icon size={18} />
               {item.label}

@@ -54,36 +54,43 @@ export default function ManageProducts() {
 
   return (
     <AdminShell title="Manage products">
-      {isLoading ? <LoadingState /> : null}
+      {isLoading ? <LoadingState label="Loading products…" /> : null}
       <div className="grid gap-4">
         {products.map((product) => (
-          <div key={product._id} className="grid gap-4 rounded-3xl border border-roseGold/10 bg-white p-4 shadow-sm md:grid-cols-[96px_1fr_auto] md:items-center">
+          <div key={product._id} className="grid gap-4 rounded-3xl border border-roseGold/10 bg-white/90 p-4 shadow-[0_18px_40px_-30px_rgba(74,40,48,0.5)] backdrop-blur-sm transition hover:border-roseGold/25 md:grid-cols-[96px_1fr_auto] md:items-center">
             <img src={productImage(product)} alt={product.name} onError={handleImageError} className="h-24 w-24 rounded-2xl object-cover" />
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-roseGold">{product.category}</p>
-              <h2 className="font-display text-2xl font-bold">{product.name}</h2>
-              <p className="mt-1 text-sm text-ink/60">{formatPrice(product.price)} · {product.stock} stock</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-roseGold">{product.category}</p>
+                {product.isFeatured ? <span className="badge-gold">Featured</span> : null}
+                {product.isBestSelling ? <span className="badge-ink">Best seller</span> : null}
+              </div>
+              <h2 className="mt-1 font-display text-2xl font-bold">{product.name}</h2>
+              <p className="mt-1 text-sm text-ink/60">
+                {formatPrice(product.price)} · <span className={product.stock > 0 ? 'text-emerald-600' : 'text-red-500'}>{product.stock} stock</span>
+              </p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => setEditing(product)} className="grid h-11 w-11 place-items-center rounded-full bg-pearl text-ink" type="button" aria-label="Edit product">
+              <button onClick={() => setEditing(product)} className="grid h-11 w-11 place-items-center rounded-full bg-pearl text-ink transition hover:bg-blush hover:text-roseGold" type="button" aria-label="Edit product">
                 <Pencil size={17} />
               </button>
-              <button onClick={() => handleDelete(product._id)} className="grid h-11 w-11 place-items-center rounded-full bg-red-50 text-red-500" type="button" aria-label="Delete product">
+              <button onClick={() => handleDelete(product._id)} className="grid h-11 w-11 place-items-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-100" type="button" aria-label="Delete product">
                 <Trash2 size={17} />
               </button>
             </div>
           </div>
         ))}
+        {!isLoading && !products.length ? <p className="rounded-3xl border border-roseGold/10 bg-white/80 p-8 text-center text-ink/55">No products yet.</p> : null}
       </div>
       {editing ? (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/50 p-4">
-          <form onSubmit={handleEditSubmit} className="mx-auto my-8 max-w-3xl rounded-[2rem] bg-white p-6 shadow-soft">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/60 p-4 backdrop-blur-sm">
+          <form onSubmit={handleEditSubmit} className="animate-fade-scale mx-auto my-8 max-w-3xl rounded-4xl border border-white/60 bg-white p-6 shadow-lux sm:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-roseGold">Edit product</p>
-                <h2 className="font-display text-3xl font-bold">{editing.name}</h2>
+                <p className="eyebrow">Edit product</p>
+                <h2 className="mt-1 font-display text-3xl font-bold">{editing.name}</h2>
               </div>
-              <button type="button" onClick={() => setEditing(null)} className="rounded-full bg-pearl px-4 py-2 text-sm font-bold">Close</button>
+              <button type="button" onClick={() => setEditing(null)} className="rounded-full bg-pearl px-4 py-2 text-sm font-bold transition hover:bg-blush hover:text-roseGold">Close</button>
             </div>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <input className="field" name="name" defaultValue={editing.name} required />
