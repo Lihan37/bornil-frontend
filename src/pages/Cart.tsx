@@ -64,7 +64,7 @@ export default function Cart() {
         </Link>
       </div>
 
-      <aside className="h-fit rounded-[2rem] border border-roseGold/10 bg-white/90 p-6 shadow-soft backdrop-blur-sm lg:sticky lg:top-28">
+      <aside className="h-fit rounded-4xl border border-roseGold/10 bg-white/90 p-6 shadow-soft backdrop-blur-sm lg:sticky lg:top-28">
         <h2 className="font-display text-2xl font-bold">Order summary</h2>
         <div className="mt-6 space-y-3 text-sm">
           <div className="flex justify-between text-ink/70"><span>Subtotal</span><span className="font-bold text-ink">{formatPrice(total)}</span></div>

@@ -42,7 +42,7 @@ export default function OrderHistory() {
         ))}
 
         {!isLoading && !orders.length ? (
-          <div className="grid place-items-center rounded-[2rem] border border-roseGold/15 bg-white/80 px-6 py-14 text-center">
+          <div className="grid place-items-center rounded-4xl border border-roseGold/15 bg-white/80 px-6 py-14 text-center">
             <div className="grid h-14 w-14 place-items-center rounded-full bg-blush text-roseGold">
               <PackageOpen size={24} />
             </div>

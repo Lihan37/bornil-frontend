@@ -32,7 +32,7 @@ export default function Profile() {
 
   return (
     <section className="container-pad grid min-h-[60vh] place-items-center py-10">
-      <form onSubmit={handleSubmit((values) => mutation.mutate({ name: values.name, email: values.email || undefined }))} className="w-full max-w-xl rounded-[2rem] border border-roseGold/10 bg-white/90 p-7 shadow-lux backdrop-blur-sm sm:p-8">
+      <form onSubmit={handleSubmit((values) => mutation.mutate({ name: values.name, email: values.email || undefined }))} className="w-full max-w-xl rounded-4xl border border-roseGold/10 bg-white/90 p-7 shadow-lux backdrop-blur-sm sm:p-8">
         <div className="flex items-center gap-4">
           <div className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-linear-to-br from-champagne to-goldLight font-display text-2xl font-bold text-ink">
             {(user?.name || 'B').charAt(0).toUpperCase()}

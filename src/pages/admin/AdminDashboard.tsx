@@ -43,10 +43,10 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
-      <div className="mt-6 rounded-[2rem] border border-roseGold/10 bg-white/90 p-6 shadow-soft backdrop-blur-sm">
+      <div className="mt-6 rounded-4xl border border-roseGold/10 bg-white/90 p-6 shadow-soft backdrop-blur-sm">
         <h2 className="font-display text-2xl font-bold">Recent orders</h2>
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-160 text-left text-sm">
             <thead className="text-xs uppercase tracking-[0.18em] text-ink/45">
               <tr>
                 <th className="py-3">Customer</th>

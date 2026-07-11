@@ -50,7 +50,7 @@ export default function LoginRegister() {
 
   return (
     <section className="container-pad grid min-h-[70vh] place-items-center py-12">
-      <div className="animate-fade-scale w-full max-w-md rounded-[2rem] border border-roseGold/10 bg-white/90 p-7 shadow-lux backdrop-blur-sm sm:p-8">
+      <div className="animate-fade-scale w-full max-w-md rounded-4xlrder border-roseGold/10 bg-white/90 p-7 shadow-lux backdrop-blur-sm sm:p-8">
         <p className="eyebrow">Bornil Vibes</p>
         <h1 className="mt-3 font-display text-4xl font-bold">{mode === 'login' ? 'Welcome back' : 'Create account'}</h1>
         <p className="mt-2 text-sm text-ink/55">{mode === 'login' ? 'Sign in to continue to your account.' : 'Join us for early access to one-of-one drops.'}</p>
