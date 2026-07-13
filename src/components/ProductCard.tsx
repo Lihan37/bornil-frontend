@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCartStore } from '../store/cartStore';
 import type { Product } from '../types';
+import { trackAddToCart } from '../utils/analytics';
 import { formatPrice } from '../utils/format';
 import { handleImageError } from '../utils/imageFallback';
 import { productImage } from '../utils/productImage';
@@ -18,6 +19,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const handleAdd = () => {
     addItem(product, 1);
+    trackAddToCart(product, 1);
     toast.success(`${product.name} added to cart`);
   };
 

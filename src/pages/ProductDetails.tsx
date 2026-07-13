@@ -1,6 +1,6 @@
 import { ChevronRight, Heart, Minus, Plus, ShieldCheck, ShoppingBag, Truck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ErrorState from '../components/ErrorState';
@@ -8,6 +8,7 @@ import LoadingState from '../components/LoadingState';
 import ProductCard from '../components/ProductCard';
 import { getProduct, getProducts } from '../services/productService';
 import { useCartStore } from '../store/cartStore';
+import { trackAddToCart, trackViewItem } from '../utils/analytics';
 import { formatPrice } from '../utils/format';
 import { handleImageError } from '../utils/imageFallback';
 import { productImage } from '../utils/productImage';
@@ -24,6 +25,12 @@ export default function ProductDetails() {
     enabled: Boolean(product?.category),
   });
 
+  // Fire ViewContent / view_item once the product loads.
+  useEffect(() => {
+    if (product) trackViewItem(product);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?._id]);
+
   if (isLoading) return <section className="container-pad py-10"><LoadingState /></section>;
   if (isError || !product) return <section className="container-pad py-10"><ErrorState message="Product not found." /></section>;
 
@@ -34,6 +41,7 @@ export default function ProductDetails() {
 
   const handleAdd = () => {
     addItem(product, quantity);
+    trackAddToCart(product, quantity);
     toast.success(`${quantity} ${product.name} added to cart`);
   };
 

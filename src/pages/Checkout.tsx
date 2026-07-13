@@ -1,11 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { createOrder } from '../services/orderService';
 import { selectCartTotal, useCartStore } from '../store/cartStore';
+import { trackBeginCheckout, trackPurchase } from '../utils/analytics';
 import { formatPrice } from '../utils/format';
 
 const checkoutSchema = z.object({
@@ -28,13 +30,20 @@ export default function Checkout() {
 
   const mutation = useMutation({
     mutationFn: createOrder,
-    onSuccess: () => {
+    onSuccess: (order) => {
+      trackPurchase(items, order.totalAmount, order._id);
       clearCart();
       toast.success('Order placed successfully');
       navigate('/products');
     },
     onError: () => toast.error('Could not place order. Check your backend API.'),
   });
+
+  // Fire InitiateCheckout / begin_checkout once when the checkout page opens with items.
+  useEffect(() => {
+    if (items.length) trackBeginCheckout(items, total);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onSubmit = (values: CheckoutForm) => {
     mutation.mutate({
