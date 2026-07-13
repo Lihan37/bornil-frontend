@@ -23,6 +23,7 @@ export default function Checkout() {
   const navigate = useNavigate();
   const { items, clearCart } = useCartStore();
   const total = selectCartTotal(items);
+  const DELIVERY = 120;
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: { paymentMethod: 'cash_on_delivery' },
@@ -31,7 +32,10 @@ export default function Checkout() {
   const mutation = useMutation({
     mutationFn: createOrder,
     onSuccess: (order) => {
-      trackPurchase(items, order.totalAmount, order._id);
+      // Prefer the server-computed total; fall back to the client total so the
+      // Purchase event always carries a valid numeric value + currency.
+      const value = typeof order?.totalAmount === 'number' ? order.totalAmount : total + DELIVERY;
+      trackPurchase(items, value, order?._id);
       clearCart();
       toast.success('Order placed successfully');
       navigate('/products');
@@ -51,8 +55,6 @@ export default function Checkout() {
       items: items.map(({ product, quantity }) => ({ productId: product._id, quantity })),
     });
   };
-
-  const DELIVERY = 120;
 
   return (
     <section className="container-pad grid gap-8 py-12 lg:grid-cols-[1fr_380px]">
