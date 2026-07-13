@@ -2,11 +2,13 @@ import { FormEvent, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import AdminShell from './AdminShell';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import { createCategory, deleteCategory, getCategories, updateCategory, type CategoryRecord } from '../../services/categoryService';
 
 export default function ManageCategories() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<CategoryRecord | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CategoryRecord | null>(null);
   const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: getCategories });
 
   const saveMutation = useMutation({
@@ -25,6 +27,7 @@ export default function ManageCategories() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Category deleted');
+      setDeleteTarget(null);
     },
     onError: () => toast.error('Could not delete category'),
   });
@@ -67,11 +70,21 @@ export default function ManageCategories() {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setEditing(category)} className="btn-secondary py-2" type="button">Edit</button>
-              <button onClick={() => window.confirm('Delete category?') && deleteMutation.mutate(category._id)} className="rounded-full bg-red-50 px-5 py-2 text-sm font-bold text-red-500" type="button">Delete</button>
+              <button onClick={() => setDeleteTarget(category)} className="rounded-full bg-red-50 px-5 py-2 text-sm font-bold text-red-500 transition hover:bg-red-100" type="button">Delete</button>
             </div>
           </div>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete category?"
+        message={deleteTarget ? `"${deleteTarget.name}" will be removed. Products in it won't be deleted.` : ''}
+        confirmLabel="Delete"
+        loading={deleteMutation.isPending}
+        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget._id)}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </AdminShell>
   );
 }

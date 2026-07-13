@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FormEvent, useState } from 'react';
 import { toast } from 'sonner';
 import AdminShell from './AdminShell';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import LoadingState from '../../components/LoadingState';
 import { getCategories } from '../../services/categoryService';
 import { deleteProduct, getProducts, updateProduct } from '../../services/productService';
@@ -14,6 +15,7 @@ import { productImage } from '../../utils/productImage';
 export default function ManageProducts() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<Product | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [files, setFiles] = useState<FileList | null>(null);
   const { data, isLoading } = useQuery({ queryKey: ['products', 'admin-manage'], queryFn: () => getProducts({ limit: 48 }) });
   const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: getCategories });
@@ -23,6 +25,7 @@ export default function ManageProducts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       toast.success('Product deleted');
+      setDeleteTarget(null);
     },
     onError: () => toast.error('Could not delete product. Check your backend API.'),
   });
@@ -37,11 +40,6 @@ export default function ManageProducts() {
     onError: () => toast.error('Could not update product. Check your backend API.'),
   });
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Delete this product?')) {
-      deleteMutation.mutate(id);
-    }
-  };
 
   const handleEditSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -74,7 +72,7 @@ export default function ManageProducts() {
               <button onClick={() => setEditing(product)} className="grid h-11 w-11 place-items-center rounded-full bg-pearl text-ink transition hover:bg-blush hover:text-roseGold" type="button" aria-label="Edit product">
                 <Pencil size={17} />
               </button>
-              <button onClick={() => handleDelete(product._id)} className="grid h-11 w-11 place-items-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-100" type="button" aria-label="Delete product">
+              <button onClick={() => setDeleteTarget(product)} className="grid h-11 w-11 place-items-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-100" type="button" aria-label="Delete product">
                 <Trash2 size={17} />
               </button>
             </div>
@@ -122,6 +120,16 @@ export default function ManageProducts() {
           </form>
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete product?"
+        message={deleteTarget ? `"${deleteTarget.name}" will be permanently removed. This cannot be undone.` : ''}
+        confirmLabel="Delete"
+        loading={deleteMutation.isPending}
+        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget._id)}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </AdminShell>
   );
 }

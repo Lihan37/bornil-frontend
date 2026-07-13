@@ -1,7 +1,9 @@
 import { ShieldCheck, ShieldX, Trash2 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import AdminShell from './AdminShell';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import LoadingState from '../../components/LoadingState';
 import { deleteUser, getAdminUsers, updateUserStatus } from '../../services/userService';
 import { useAuthStore } from '../../store/authStore';
@@ -9,6 +11,7 @@ import { useAuthStore } from '../../store/authStore';
 export default function ManageUsers() {
   const queryClient = useQueryClient();
   const currentUser = useAuthStore((state) => state.user);
+  const [deleteTarget, setDeleteTarget] = useState<{ _id: string; name: string } | null>(null);
   const { data: users = [], isLoading } = useQuery({ queryKey: ['admin-users'], queryFn: getAdminUsers });
 
   const statusMutation = useMutation({
@@ -25,6 +28,7 @@ export default function ManageUsers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast.success('User deleted');
+      setDeleteTarget(null);
     },
     onError: () => toast.error('Could not delete user'),
   });
@@ -69,7 +73,7 @@ export default function ManageUsers() {
                   <button
                     type="button"
                     disabled={isSelf || deleteMutation.isPending}
-                    onClick={() => window.confirm('Delete this user?') && deleteMutation.mutate(user._id)}
+                    onClick={() => setDeleteTarget({ _id: user._id, name: user.name })}
                     className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <Trash2 size={16} />
@@ -81,6 +85,16 @@ export default function ManageUsers() {
           );
         })}
       </div>
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete user?"
+        message={deleteTarget ? `${deleteTarget.name}'s account will be permanently deleted. This cannot be undone.` : ''}
+        confirmLabel="Delete"
+        loading={deleteMutation.isPending}
+        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget._id)}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </AdminShell>
   );
 }
