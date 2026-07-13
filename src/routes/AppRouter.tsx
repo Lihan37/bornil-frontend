@@ -6,6 +6,7 @@ import ManageProducts from '../pages/admin/ManageProducts';
 import ManageCategories from '../pages/admin/ManageCategories';
 import ManageUsers from '../pages/admin/ManageUsers';
 import Orders from '../pages/admin/Orders';
+import TrackingSettings from '../pages/admin/TrackingSettings';
 import About from '../pages/About';
 import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
@@ -44,6 +45,7 @@ export default function AppRouter() {
             <Route path="admin/categories" element={<ManageCategories />} />
             <Route path="admin/orders" element={<Orders />} />
             <Route path="admin/users" element={<ManageUsers />} />
+            <Route path="admin/tracking" element={<TrackingSettings />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Route>

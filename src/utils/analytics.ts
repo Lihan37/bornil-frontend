@@ -1,16 +1,13 @@
 import type { CartItem, Product } from '../types';
 
 /**
- * Lightweight analytics layer for the storefront.
+ * Storefront analytics — pushes standard ecommerce events to window.dataLayer
+ * (GA4 schema). Google Tag Manager is the single source of truth: the client
+ * builds tags/triggers in GTM on these events to fire Meta Pixel, GA4, TikTok,
+ * etc. We intentionally do NOT fire the Pixel directly here, so events are never
+ * double-counted when GTM also has tags for them.
  *
- * Every event is pushed to two places so the client can track however they like:
- *   1. window.dataLayer  -> pick it up in Google Tag Manager (GTM-N8VZ57LJ) and
- *      build tags/triggers for GA4, Meta, TikTok, etc. without touching code.
- *   2. window.fbq        -> fires the matching Meta (Facebook) Pixel standard event
- *      directly, so the Pixel works even without any GTM setup.
- *
- * GA4-style ecommerce schema is used for the dataLayer so GTM's built-in
- * "Google Analytics: GA4 Event" tags map 1:1 with no extra config.
+ * dataLayer events: view_item, add_to_cart, begin_checkout, purchase.
  */
 
 const CURRENCY = 'BDT';
@@ -18,7 +15,6 @@ const CURRENCY = 'BDT';
 declare global {
   interface Window {
     dataLayer?: Record<string, unknown>[];
-    fbq?: (...args: unknown[]) => void;
   }
 }
 
@@ -31,11 +27,6 @@ function pushEcommerce(event: string, ecommerce: Record<string, unknown>) {
   window.dataLayer.push({ event, ecommerce });
 }
 
-function fbqTrack(event: string, payload: Record<string, unknown>) {
-  if (typeof window === 'undefined' || typeof window.fbq !== 'function') return;
-  window.fbq('track', event, payload);
-}
-
 function toItem(product: Product, quantity = 1) {
   return {
     item_id: product._id,
@@ -46,61 +37,35 @@ function toItem(product: Product, quantity = 1) {
   };
 }
 
-/** Product page viewed. GA4: view_item · Meta: ViewContent */
+/** Product page viewed. GA4: view_item (Meta: ViewContent via GTM). */
 export function trackViewItem(product: Product) {
   pushEcommerce('view_item', { currency: CURRENCY, value: product.price, items: [toItem(product)] });
-  fbqTrack('ViewContent', {
-    content_ids: [product._id],
-    content_name: product.name,
-    content_category: product.category,
-    content_type: 'product',
-    value: product.price,
-    currency: CURRENCY,
-  });
 }
 
-/** Item added to cart. GA4: add_to_cart · Meta: AddToCart */
+/** Item added to cart. GA4: add_to_cart (Meta: AddToCart via GTM). */
 export function trackAddToCart(product: Product, quantity = 1) {
-  const value = product.price * quantity;
-  pushEcommerce('add_to_cart', { currency: CURRENCY, value, items: [toItem(product, quantity)] });
-  fbqTrack('AddToCart', {
-    content_ids: [product._id],
-    content_name: product.name,
-    content_type: 'product',
-    value,
+  pushEcommerce('add_to_cart', {
     currency: CURRENCY,
+    value: product.price * quantity,
+    items: [toItem(product, quantity)],
   });
 }
 
-/** Checkout started. GA4: begin_checkout · Meta: InitiateCheckout */
+/** Checkout started. GA4: begin_checkout (Meta: InitiateCheckout via GTM). */
 export function trackBeginCheckout(items: CartItem[], value: number) {
   pushEcommerce('begin_checkout', {
     currency: CURRENCY,
     value,
     items: items.map(({ product, quantity }) => toItem(product, quantity)),
   });
-  fbqTrack('InitiateCheckout', {
-    content_ids: items.map(({ product }) => product._id),
-    content_type: 'product',
-    num_items: items.reduce((sum, item) => sum + item.quantity, 0),
-    value,
-    currency: CURRENCY,
-  });
 }
 
-/** Order placed successfully. GA4: purchase · Meta: Purchase */
+/** Order placed successfully. GA4: purchase (Meta: Purchase via GTM). */
 export function trackPurchase(items: CartItem[], value: number, transactionId?: string) {
   pushEcommerce('purchase', {
     transaction_id: transactionId,
     currency: CURRENCY,
     value,
     items: items.map(({ product, quantity }) => toItem(product, quantity)),
-  });
-  fbqTrack('Purchase', {
-    content_ids: items.map(({ product }) => product._id),
-    content_type: 'product',
-    num_items: items.reduce((sum, item) => sum + item.quantity, 0),
-    value,
-    currency: CURRENCY,
   });
 }

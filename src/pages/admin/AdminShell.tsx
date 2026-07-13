@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom';
-import { BarChart3, ClipboardList, FolderTree, Home, LogOut, Menu, PackagePlus, Settings, UsersRound, X } from 'lucide-react';
+import { BarChart3, ClipboardList, FolderTree, Home, LineChart, LogOut, Menu, PackagePlus, Settings, UsersRound, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { cn } from '../../utils/cn';
@@ -13,6 +13,7 @@ const adminLinks = [
   { label: 'Categories', href: '/admin/categories', icon: FolderTree },
   { label: 'Orders', href: '/admin/orders', icon: ClipboardList },
   { label: 'Users', href: '/admin/users', icon: UsersRound },
+  { label: 'Tracking', href: '/admin/tracking', icon: LineChart },
 ];
 
 export default function AdminShell({ title, children }: { title: string; children: ReactNode }) {
