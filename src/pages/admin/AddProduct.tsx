@@ -15,7 +15,10 @@ const productSchema = z.object({
   price: z.coerce.number().min(1),
   category: z.string().min(2, 'Category is required'),
   description: z.string().min(10),
-  images: z.custom<FileList>((files) => files instanceof FileList && files.length > 0, 'At least one image is required'),
+  images: z
+    .custom<FileList>((files) => files instanceof FileList && files.length > 0, 'At least one image is required')
+    .refine((files) => files.length <= 6, 'You can upload at most 6 images')
+    .refine((files) => Array.from(files).every((file) => file.size <= 8 * 1024 * 1024), 'Each image must be 8MB or smaller'),
   material: z.string().min(2),
   color: z.string().min(2),
   size: z.string().min(1),

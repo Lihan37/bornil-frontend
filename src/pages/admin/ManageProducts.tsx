@@ -52,7 +52,13 @@ export default function ManageProducts() {
     if (!editing) return;
     const form = new FormData(event.currentTarget);
     form.set('existingImages', JSON.stringify(editing.images));
-    if (files) Array.from(files).forEach((file) => form.append('images', file));
+    if (files) {
+      if (Array.from(files).some((file) => file.size > 8 * 1024 * 1024)) {
+        toast.error('Each image must be 8MB or smaller');
+        return;
+      }
+      Array.from(files).forEach((file) => form.append('images', file));
+    }
     updateMutation.mutate({ id: editing._id, formData: form });
   };
 
