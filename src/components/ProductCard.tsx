@@ -31,7 +31,7 @@ export default function ProductCard({ product }: { product: Product }) {
             src={productImage(product)}
             alt={product.name}
             onError={handleImageError}
-            className="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            className="aspect-4/5 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
         </Link>
 

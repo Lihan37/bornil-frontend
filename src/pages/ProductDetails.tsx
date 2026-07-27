@@ -60,7 +60,7 @@ export default function ProductDetails() {
 
       <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr]">
         <div className="lg:sticky lg:top-28 lg:self-start">
-        <div className="relative overflow-hidden rounded-[2rem] bg-blush shadow-soft">
+        <div className="relative overflow-hidden rounded-4xl bg-blush shadow-soft">
           {hasDiscount ? <span className="badge-rose absolute left-4 top-4 z-10">Sale</span> : null}
           <img src={images[activeImage]} alt={product.name} onError={handleImageError} className="aspect-square w-full object-cover transition duration-500" />
         </div>
@@ -75,7 +75,7 @@ export default function ProductDetails() {
         ) : null}
         </div>
 
-        <div className="rounded-[2rem] border border-roseGold/10 bg-white/90 p-6 shadow-soft backdrop-blur-sm lg:p-8">
+        <div className="rounded-4xl border border-roseGold/10 bg-white/90 p-6 shadow-soft backdrop-blur-sm lg:p-8">
         <p className="eyebrow">{product.category}</p>
         <h1 className="mt-3 font-display text-4xl font-bold leading-tight">{product.name}</h1>
         <div className="mt-4 flex items-end gap-3">

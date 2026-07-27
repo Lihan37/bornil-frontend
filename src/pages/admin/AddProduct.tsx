@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import type { ReactNode } from 'react';
 import { toast } from 'sonner';
@@ -43,7 +44,12 @@ export default function AddProduct() {
       toast.success('Product added');
       reset();
     },
-    onError: () => toast.error('Could not add product. Check your backend API.'),
+    onError: (error) => {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || 'Could not add product. Please try again.'
+        : 'Could not add product. Please try again.';
+      toast.error(message);
+    },
   });
 
   return (

@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { FormEvent, useState } from 'react';
 import { toast } from 'sonner';
 import AdminShell from './AdminShell';
@@ -37,7 +38,12 @@ export default function ManageProducts() {
       setEditing(null);
       setFiles(null);
     },
-    onError: () => toast.error('Could not update product. Check your backend API.'),
+    onError: (error) => {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || 'Could not update product. Please try again.'
+        : 'Could not update product. Please try again.';
+      toast.error(message);
+    },
   });
 
 
