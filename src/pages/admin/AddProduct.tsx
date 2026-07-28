@@ -21,7 +21,7 @@ const productSchema = z.object({
     .refine((files) => Array.from(files).every((file) => file.size <= 8 * 1024 * 1024), 'Each image must be 8MB or smaller'),
   material: z.string().min(2),
   color: z.string().min(2),
-  size: z.string().min(1),
+  size: z.string().optional(),
   stock: z.coerce.number().min(0),
   isFeatured: z.boolean().optional(),
   isBestSelling: z.boolean().optional(),
@@ -69,7 +69,7 @@ export default function AddProduct() {
           <Field label="Product images" error={errors.images?.message}><input className="field" type="file" accept="image/*" multiple {...register('images')} /></Field>
           <Field label="Material" error={errors.material?.message}><input className="field" {...register('material')} /></Field>
           <Field label="Color" error={errors.color?.message}><input className="field" {...register('color')} /></Field>
-          <Field label="Size" error={errors.size?.message}><input className="field" {...register('size')} /></Field>
+          <Field label="Size (optional)" error={errors.size?.message}><input className="field" {...register('size')} /></Field>
           <Field label="Stock" error={errors.stock?.message}><input className="field" type="number" {...register('stock')} /></Field>
           <div className="md:col-span-2">
             <Field label="Description" error={errors.description?.message}><textarea className="field min-h-32" {...register('description')} /></Field>

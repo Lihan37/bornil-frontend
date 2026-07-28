@@ -91,7 +91,7 @@ export default function ProductDetails() {
           {[
             ['Material', product.material],
             ['Color', product.color],
-            ['Size', product.size],
+            ['Size', product.size || 'One size'],
             ['Stock', product.stock > 0 ? `${product.stock} available` : 'Out of stock'],
           ].map(([label, value]) => (
             <div key={label}>

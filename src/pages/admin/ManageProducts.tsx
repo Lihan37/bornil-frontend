@@ -111,7 +111,7 @@ export default function ManageProducts() {
               <input className="field" name="stock" type="number" defaultValue={editing.stock} required />
               <input className="field" name="material" defaultValue={editing.material} required />
               <input className="field" name="color" defaultValue={editing.color} required />
-              <input className="field" name="size" defaultValue={editing.size} required />
+              <input className="field" name="size" defaultValue={editing.size} placeholder="Size (optional)" />
               <select className="field" name="status" defaultValue={editing.status}>
                 <option value="active">Active</option>
                 <option value="draft">Draft</option>
