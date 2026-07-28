@@ -12,7 +12,8 @@ const statusStyles: Record<OrderStatus, string> = {
   confirmed: 'bg-sky-100 text-sky-700',
   processing: 'bg-indigo-100 text-indigo-700',
   shipped: 'bg-violet-100 text-violet-700',
-  delivered: 'bg-emerald-100 text-emerald-700',
+  delivered: 'bg-teal-100 text-teal-700',
+  paid: 'bg-emerald-500 text-white',
   cancelled: 'bg-red-100 text-red-600',
 };
 
@@ -21,13 +22,15 @@ export default function AdminDashboard() {
   const products = data?.products || [];
   const { data: orders = [] } = useQuery({ queryKey: ['admin-orders'], queryFn: getOrders });
   const { data: users = [] } = useQuery({ queryKey: ['admin-users'], queryFn: getAdminUsers });
-  const revenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+  // Revenue counts only orders marked "paid".
+  const paidOrders = orders.filter((order) => order.orderStatus === 'paid');
+  const revenue = paidOrders.reduce((sum, order) => sum + order.totalAmount, 0);
 
   const stats = [
     { label: 'Products', value: products.length.toString(), icon: Package },
     { label: 'Orders', value: orders.length.toString(), icon: ClipboardList },
     { label: 'Users', value: users.length.toString(), icon: Users },
-    { label: 'Revenue', value: formatPrice(revenue), icon: TrendingUp },
+    { label: 'Revenue (paid)', value: formatPrice(revenue), icon: TrendingUp },
   ];
 
   return (

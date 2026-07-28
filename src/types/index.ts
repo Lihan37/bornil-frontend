@@ -56,7 +56,7 @@ export type AuthResponse = {
   user: User;
 };
 
-export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'paid' | 'cancelled';
 
 export type Order = {
   _id: string;

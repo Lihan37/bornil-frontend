@@ -10,7 +10,8 @@ const statusStyles: Record<OrderStatus, string> = {
   confirmed: 'bg-sky-100 text-sky-700',
   processing: 'bg-indigo-100 text-indigo-700',
   shipped: 'bg-violet-100 text-violet-700',
-  delivered: 'bg-emerald-100 text-emerald-700',
+  delivered: 'bg-teal-100 text-teal-700',
+  paid: 'bg-emerald-500 text-white',
   cancelled: 'bg-red-100 text-red-600',
 };
 
