@@ -3,15 +3,17 @@ import type { ApiResponse, Category } from '../types';
 
 export type CategoryRecord = {
   _id: string;
-  name: Category;
+  name: Category | string;
   slug: string;
   image?: string;
   isFeatured: boolean;
 };
 
+const visibleCategory = (category: CategoryRecord) => category.name !== 'Bridal Jewelry';
+
 export async function getCategories() {
   const { data } = await api.get<ApiResponse<CategoryRecord[]>>('/categories');
-  return data.data;
+  return data.data.filter(visibleCategory);
 }
 
 export async function createCategory(payload: { name: string; image?: string; isFeatured: boolean }) {

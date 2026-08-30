@@ -3,9 +3,10 @@ import type { ApiResponse, PaginatedProducts, Product, ProductFilters } from '..
 
 export async function getProducts(filters?: ProductFilters) {
   const { data } = await api.get<ApiResponse<Product[]>>('/products', { params: filters });
+  const products = data.data.filter((product) => String(product.category) !== 'Bridal Jewelry');
   return {
-    products: data.data,
-    meta: data.meta || { page: 1, limit: data.data.length, total: data.data.length, totalPages: 1 },
+    products,
+    meta: data.meta || { page: 1, limit: products.length, total: products.length, totalPages: 1 },
   } satisfies PaginatedProducts;
 }
 

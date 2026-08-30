@@ -8,5 +8,4 @@ export const categories: Category[] = [
   'Bangles',
   'Anklets',
   'Hair Accessories',
-  'Bridal Jewelry',
 ];

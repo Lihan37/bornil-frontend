@@ -14,7 +14,6 @@ const navItems = [
 
 const announcements = [
   'Handmade, one-of-one jewelry',
-  'Free delivery inside Dhaka',
   'Cash on delivery available',
   'Nationwide shipping in 4–5 days',
 ];
@@ -160,15 +159,15 @@ export default function MainLayout() {
               <div>
                 <h3 className="font-display text-2xl font-bold">Bornil Vibes</h3>
                 <p className="mt-4 max-w-sm text-sm leading-7 text-ink/60">
-                  Handcrafted, one-of-one jewelry from Dhaka — soft gold details and feminine styling for everyday glow, celebrations, and bridal moments.
+                  Handcrafted, one-of-one jewelry from Dhaka - soft gold details and feminine styling for everyday glow and celebrations.
                 </p>
                 <div className="mt-5 flex gap-2.5">
                   {[
-                    { icon: Instagram, label: 'Instagram' },
-                    { icon: Facebook, label: 'Facebook' },
-                    { icon: Mail, label: 'Email' },
-                  ].map(({ icon: Icon, label }) => (
-                    <a key={label} href="#" aria-label={label} className="grid h-10 w-10 place-items-center rounded-full border border-roseGold/15 bg-white text-ink/70 transition hover:-translate-y-0.5 hover:border-roseGold hover:text-roseGold">
+                    { icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/bornil_vibes?igsi=MXFzc3lwbWNuN3Jmbw==' },
+                    { icon: Facebook, label: 'Facebook', href: 'https://www.facebook.com/share/189nzpL7U4/?mibextid=wwXIfr' },
+                    { icon: Mail, label: 'Email', href: 'mailto:support@bornilvibes.com' },
+                  ].map(({ icon: Icon, label, href }) => (
+                    <a key={label} href={href} target={href.startsWith('http') ? '_blank' : undefined} rel={href.startsWith('http') ? 'noreferrer' : undefined} aria-label={label} className="grid h-10 w-10 place-items-center rounded-full border border-roseGold/15 bg-white text-ink/70 transition hover:-translate-y-0.5 hover:border-roseGold hover:text-roseGold">
                       <Icon size={17} />
                     </a>
                   ))}
@@ -179,7 +178,6 @@ export default function MainLayout() {
                 <h4 className="text-sm font-bold uppercase tracking-[0.16em] text-ink/50">Shop</h4>
                 <div className="mt-4 grid gap-2.5 text-sm text-ink/65">
                   <Link to="/products" className="w-fit transition hover:text-roseGold">All Products</Link>
-                  <Link to="/products?category=Bridal%20Jewelry" className="w-fit transition hover:text-roseGold">Bridal</Link>
                   <Link to="/cart" className="w-fit transition hover:text-roseGold">Cart</Link>
                   <Link to="/checkout" className="w-fit transition hover:text-roseGold">Checkout</Link>
                 </div>

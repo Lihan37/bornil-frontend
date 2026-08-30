@@ -7,8 +7,7 @@ export type Category =
   | 'Bracelets'
   | 'Bangles'
   | 'Anklets'
-  | 'Hair Accessories'
-  | 'Bridal Jewelry';
+  | 'Hair Accessories';
 
 export type Product = {
   _id: string;

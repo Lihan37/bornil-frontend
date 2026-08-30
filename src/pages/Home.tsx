@@ -57,33 +57,20 @@ export default function Home() {
         <div className="container-pad flex min-h-[calc(100vh-7rem)] items-center py-16">
           <div className="max-w-3xl">
             <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] text-champagne backdrop-blur">
-              <Sparkles size={13} className="text-goldLight" /> Soft gold · Bridal glow · Everyday sparkle
+              <Sparkles size={13} className="text-goldLight" /> Soft gold � Everyday sparkle
             </p>
             <h1 className="animate-rise delay-1 mt-6 font-display text-4xl font-extrabold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
               Elegant jewelry for every <span className="text-gilded italic">Bornil</span> moment.
             </h1>
             <p className="animate-rise delay-2 mt-6 max-w-xl text-base leading-8 text-white/85">
-              Earrings, necklaces, rings, bangles, anklets, hair accessories, and bridal sets — each piece handcrafted, one-of-one, for a premium feminine wardrobe.
+              Earrings, necklaces, rings, bangles, anklets, and hair accessories - each piece handcrafted, one-of-one, for a premium feminine wardrobe.
             </p>
             <div className="animate-rise delay-3 mt-9 flex flex-wrap gap-3">
               <Link to="/products" className="btn-gold">
                 Shop the collection <ArrowRight size={17} />
               </Link>
-              <Link to="/products?category=Bridal%20Jewelry" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/50 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white hover:text-ink">
-                Explore bridal
-              </Link>
             </div>
           </div>
-        </div>
-
-        {/* Floating badge card */}
-        <div className="animate-rise delay-4 absolute bottom-8 right-4 hidden max-w-xs rounded-3xl border border-white/20 bg-white/85 p-5 shadow-lux backdrop-blur lg:right-8 lg:block">
-          <p className="eyebrow">New arrival</p>
-          <p className="mt-2 font-display text-2xl font-bold text-ink">The Bridal Edit</p>
-          <p className="mt-1 text-sm text-ink/60">Pearls, antique gold, and statement details.</p>
-          <Link to="/products?category=Bridal%20Jewelry" className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-roseGold transition hover:gap-2.5">
-            Discover <ArrowRight size={15} />
-          </Link>
         </div>
       </section>
 
@@ -113,7 +100,7 @@ export default function Home() {
           description="Find pieces that match your outfit, event, and mood."
         />
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {categories.filter((category) => category.isFeatured).slice(0, 8).map((category) => (
+          {categories.filter((category) => category.isFeatured && category.name !== 'Bridal Jewelry').slice(0, 8).map((category) => (
             <Link
               key={category._id}
               to={`/products?category=${encodeURIComponent(category.name)}`}
