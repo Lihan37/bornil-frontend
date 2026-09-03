@@ -67,7 +67,7 @@ export default function Home() {
         <div className="container-pad flex min-h-[calc(100vh-7rem)] items-center py-16">
           <div className="max-w-3xl">
             <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] text-champagne backdrop-blur">
-              <Sparkles size={13} className="text-goldLight" /> Soft gold / Everyday sparkle
+              <Sparkles size={13} className="text-goldLight" /> Everyday sparkle
             </p>
             <h1 className="animate-rise delay-1 mt-6 font-display text-4xl font-extrabold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
               Elegant jewelry for every <span className="text-gilded italic">Bornil</span> moment.
