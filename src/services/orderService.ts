@@ -1,13 +1,20 @@
 import { api } from './api';
-import type { ApiResponse, DeliveryArea, Order, OrderStatus } from '../types';
+import type { ApiResponse, AuthResponse, DeliveryArea, Order, OrderStatus } from '../types';
 
 export type CreateOrderPayload = {
   customerName: string;
   phone: string;
+  email?: string;
+  password?: string;
   address: string;
   deliveryArea: DeliveryArea;
   paymentMethod: 'cash_on_delivery';
   items: Array<{ productId: string; quantity: number }>;
+};
+
+export type CreateOrderResponse = {
+  order: Order;
+  auth?: AuthResponse;
 };
 
 export type OrderEditRequestPayload = {
@@ -16,7 +23,7 @@ export type OrderEditRequestPayload = {
 };
 
 export async function createOrder(payload: CreateOrderPayload) {
-  const { data } = await api.post<ApiResponse<Order>>('/orders', payload);
+  const { data } = await api.post<ApiResponse<CreateOrderResponse>>('/orders', payload);
   return data.data;
 }
 

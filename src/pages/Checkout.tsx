@@ -1,11 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { createOrder } from '../services/orderService';
+import { useAuthStore } from '../store/authStore';
 import { selectCartTotal, useCartStore } from '../store/cartStore';
 import { trackBeginCheckout, trackPurchase } from '../utils/analytics';
 import { formatPrice } from '../utils/format';
@@ -23,6 +25,8 @@ const deliveryAreaLabels = {
 const checkoutSchema = z.object({
   customerName: z.string().min(2, 'Name is required'),
   phone: z.string().regex(/^01[0-9]{9}$/, 'Use a valid Bangladesh phone number'),
+  email: z.string().email('Enter a valid email').optional().or(z.literal('')),
+  password: z.string().optional(),
   address: z.string().min(8, 'Full delivery address is required'),
   deliveryArea: z.enum(['inside_dhaka', 'outside_dhaka']),
   paymentMethod: z.literal('cash_on_delivery'),
@@ -32,11 +36,20 @@ type CheckoutForm = z.infer<typeof checkoutSchema>;
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const authUser = useAuthStore((state) => state.user);
+  const setAuth = useAuthStore((state) => state.setAuth);
   const { items, clearCart } = useCartStore();
+  const [showPassword, setShowPassword] = useState(false);
   const subtotal = selectCartTotal(items);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { deliveryArea: 'inside_dhaka', paymentMethod: 'cash_on_delivery' },
+    defaultValues: {
+      customerName: authUser?.name || '',
+      phone: authUser?.phone || '',
+      email: authUser?.email || '',
+      deliveryArea: 'inside_dhaka',
+      paymentMethod: 'cash_on_delivery',
+    },
   });
   const deliveryArea = watch('deliveryArea');
   const deliveryCharge = items.length ? deliveryCharges[deliveryArea] : 0;
@@ -44,27 +57,32 @@ export default function Checkout() {
 
   const mutation = useMutation({
     mutationFn: createOrder,
-    onSuccess: (order) => {
-      // Prefer the server-computed total; fall back to the client total so the
-      // Purchase event always carries a valid numeric value + currency.
+    onSuccess: ({ order, auth }) => {
+      if (auth) setAuth(auth.token, auth.user);
       const value = typeof order?.totalAmount === 'number' ? order.totalAmount : grandTotal;
       trackPurchase(items, value, order?._id);
       clearCart();
-      toast.success('Order placed successfully');
-      navigate('/products');
+      toast.success(auth ? 'Order placed and account created' : 'Order placed successfully');
+      navigate(auth ? '/dashboard/orders' : '/products');
     },
     onError: () => toast.error('Could not place order. Check your backend API.'),
   });
 
-  // Fire InitiateCheckout / begin_checkout once when the checkout page opens with items.
   useEffect(() => {
     if (items.length) trackBeginCheckout(items, grandTotal);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSubmit = (values: CheckoutForm) => {
+    if (!authUser && (!values.password || values.password.length < 6)) {
+      toast.error('Set a password so your account can be created with this order');
+      return;
+    }
+
     mutation.mutate({
       ...values,
+      email: values.email || undefined,
+      password: authUser ? undefined : values.password,
       items: items.map(({ product, quantity }) => ({ productId: product._id, quantity })),
     });
   };
@@ -74,7 +92,8 @@ export default function Checkout() {
       <form onSubmit={handleSubmit(onSubmit)} className="rounded-4xl border border-roseGold/10 bg-white/90 p-6 shadow-soft backdrop-blur-sm sm:p-8">
         <p className="eyebrow mb-2">Almost there</p>
         <h1 className="font-display text-4xl font-bold">Checkout</h1>
-        <p className="mt-1 text-sm text-ink/50">Enter your delivery details - pay with cash when it arrives.</p>
+        <p className="mt-1 text-sm text-ink/50">Enter delivery details - no login required.</p>
+        {!authUser ? <p className="mt-3 rounded-2xl bg-blush px-4 py-3 text-sm text-ink/70">We will create your account from this order so you can login later with your phone and password.</p> : null}
         <div className="mt-6 grid gap-5">
           <div>
             <label className="label">Customer name</label>
@@ -86,6 +105,28 @@ export default function Checkout() {
             <input className="field" {...register('phone')} />
             {errors.phone ? <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p> : null}
           </div>
+          <div>
+            <label className="label">Email optional</label>
+            <input className="field" type="email" {...register('email')} />
+            {errors.email ? <p className="mt-1 text-sm text-red-500">{errors.email.message}</p> : null}
+          </div>
+          {!authUser ? (
+            <div>
+              <label className="label">Create account password</label>
+              <div className="relative">
+                <input className="field pr-12" type={showPassword ? 'text' : 'password'} {...register('password')} />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-ink/55 transition hover:bg-pearl hover:text-roseGold"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-ink/45">Use this with your phone number to login later.</p>
+            </div>
+          ) : null}
           <div>
             <label className="label">Address</label>
             <textarea className="field min-h-32" {...register('address')} />

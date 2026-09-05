@@ -7,8 +7,9 @@ import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { login, register as registerUser } from '../services/authService';
+import { login, register as registerUser, requestPasswordReset } from '../services/authService';
 import { useAuthStore } from '../store/authStore';
+import type { ApiResponse, AuthResponse } from '../types';
 
 const authSchema = z.object({
   name: z.string().optional(),
@@ -18,24 +19,36 @@ const authSchema = z.object({
 });
 
 type AuthForm = z.infer<typeof authSchema>;
+type AuthMode = 'login' | 'register' | 'forgot';
 
 export default function LoginRegister() {
   const location = useLocation();
-  const [mode, setMode] = useState<'login' | 'register'>(location.pathname === '/signup' ? 'register' : 'login');
+  const [mode, setMode] = useState<AuthMode>(location.pathname === '/signup' ? 'register' : 'login');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
-  const { register, handleSubmit, formState: { errors } } = useForm<AuthForm>({ resolver: zodResolver(authSchema) });
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<AuthForm>({ resolver: zodResolver(authSchema) });
 
-  const mutation = useMutation({
-    mutationFn: (values: AuthForm) =>
-      mode === 'login'
+  const mutation = useMutation<AuthResponse | ApiResponse<null>, unknown, AuthForm>({
+    mutationFn: (values: AuthForm) => {
+      if (mode === 'forgot') return requestPasswordReset({ phone: values.phone, password: values.password });
+      return mode === 'login'
         ? login({ phone: values.phone, password: values.password })
-        : registerUser({ name: values.name || '', phone: values.phone, email: values.email || undefined, password: values.password }),
+        : registerUser({ name: values.name || '', phone: values.phone, email: values.email || undefined, password: values.password });
+    },
     onSuccess: (data) => {
-      setAuth(data.token, data.user);
-      toast.success(mode === 'login' ? 'Logged in successfully' : 'Account created');
-      navigate(data.user.role === 'admin' ? '/admin' : '/');
+      if (mode === 'forgot') {
+        toast.success('Password reset request sent. Admin will verify and approve it.');
+        reset();
+        setMode('login');
+        return;
+      }
+
+      if ('token' in data && 'user' in data) {
+        setAuth(data.token, data.user);
+        toast.success(mode === 'login' ? 'Logged in successfully' : 'Account created');
+        navigate(data.user.role === 'admin' ? '/admin' : '/');
+      }
     },
     onError: (error) => {
       const message = axios.isAxiosError(error)
@@ -48,15 +61,22 @@ export default function LoginRegister() {
     },
   });
 
+  const title = mode === 'login' ? 'Welcome back' : mode === 'register' ? 'Create account' : 'Reset password';
+  const subtitle = mode === 'login'
+    ? 'Sign in to continue to your account.'
+    : mode === 'register'
+      ? 'Join us for early access to one-of-one drops.'
+      : 'Set a new password request. Admin will verify before it becomes active.';
+
   return (
     <section className="container-pad grid min-h-[70vh] place-items-center py-12">
-      <div className="animate-fade-scale w-full max-w-md rounded-4xlrder border-roseGold/10 bg-white/90 p-7 shadow-lux backdrop-blur-sm sm:p-8">
+      <div className="animate-fade-scale w-full max-w-md rounded-4xl border border-roseGold/10 bg-white/90 p-7 shadow-lux backdrop-blur-sm sm:p-8">
         <p className="eyebrow">Bornil Vibes</p>
-        <h1 className="mt-3 font-display text-4xl font-bold">{mode === 'login' ? 'Welcome back' : 'Create account'}</h1>
-        <p className="mt-2 text-sm text-ink/55">{mode === 'login' ? 'Sign in to continue to your account.' : 'Join us for early access to one-of-one drops.'}</p>
+        <h1 className="mt-3 font-display text-4xl font-bold">{title}</h1>
+        <p className="mt-2 text-sm text-ink/55">{subtitle}</p>
         <div className="relative mt-6 grid grid-cols-2 rounded-full bg-pearl p-1">
           <span className={`absolute top-1 bottom-1 w-[calc(50%-0.25rem)] rounded-full bg-ink shadow-soft transition-transform duration-300 ${mode === 'register' ? 'translate-x-full' : 'translate-x-0'}`} />
-          <button className={`relative z-10 rounded-full px-4 py-2 text-sm font-bold transition-colors ${mode === 'login' ? 'text-white' : 'text-ink/60'}`} onClick={() => setMode('login')} type="button">Login</button>
+          <button className={`relative z-10 rounded-full px-4 py-2 text-sm font-bold transition-colors ${mode === 'login' || mode === 'forgot' ? 'text-white' : 'text-ink/60'}`} onClick={() => setMode('login')} type="button">Login</button>
           <button className={`relative z-10 rounded-full px-4 py-2 text-sm font-bold transition-colors ${mode === 'register' ? 'text-white' : 'text-ink/60'}`} onClick={() => setMode('register')} type="button">Register</button>
         </div>
         <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="mt-6 grid gap-4">
@@ -79,7 +99,7 @@ export default function LoginRegister() {
             </div>
           ) : null}
           <div>
-            <label className="label">Password</label>
+            <label className="label">{mode === 'forgot' ? 'New password' : 'Password'}</label>
             <div className="relative">
               <input className="field pr-12" type={showPassword ? 'text' : 'password'} {...register('password')} />
               <button
@@ -93,8 +113,18 @@ export default function LoginRegister() {
             </div>
             {errors.password ? <p className="mt-1 text-sm text-red-500">{errors.password.message}</p> : null}
           </div>
+          {mode === 'login' ? (
+            <button className="w-fit text-sm font-bold text-roseGold transition hover:text-ink" type="button" onClick={() => setMode('forgot')}>
+              Forgot password?
+            </button>
+          ) : null}
+          {mode === 'forgot' ? (
+            <button className="w-fit text-sm font-bold text-roseGold transition hover:text-ink" type="button" onClick={() => setMode('login')}>
+              Back to login
+            </button>
+          ) : null}
           <button className="btn-primary mt-2 w-full" disabled={mutation.isPending} type="submit">
-            {mutation.isPending ? 'Please wait...' : mode === 'login' ? 'Login' : 'Register'}
+            {mutation.isPending ? 'Please wait...' : mode === 'login' ? 'Login' : mode === 'register' ? 'Register' : 'Request reset'}
           </button>
         </form>
       </div>

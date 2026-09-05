@@ -11,6 +11,11 @@ export async function register(payload: { name: string; phone: string; email?: s
   return data.data;
 }
 
+export async function requestPasswordReset(payload: { phone: string; password: string }) {
+  const { data } = await api.post<ApiResponse<null>>('/auth/password-reset/request', payload);
+  return data;
+}
+
 export async function getMe() {
   const { data } = await api.get<ApiResponse<User>>('/auth/me');
   return data.data;

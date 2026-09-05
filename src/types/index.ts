@@ -39,6 +39,15 @@ export type CartItem = {
   quantity: number;
 };
 
+export type PasswordResetRequestStatus = 'pending' | 'approved' | 'rejected';
+
+export type PasswordResetRequest = {
+  status: PasswordResetRequestStatus;
+  adminNote?: string;
+  requestedAt: string;
+  respondedAt?: string;
+};
+
 export type User = {
   _id: string;
   name: string;
@@ -46,6 +55,7 @@ export type User = {
   email?: string;
   role: Role;
   status?: 'active' | 'blocked';
+  passwordResetRequest?: PasswordResetRequest;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -92,6 +102,7 @@ export type Order = {
   items: OrderItem[];
   totalAmount: number;
   orderStatus: OrderStatus;
+  inventoryRestored?: boolean;
   editRequest?: OrderEditRequest;
   createdAt: string;
   updatedAt: string;
