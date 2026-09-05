@@ -57,6 +57,27 @@ export type AuthResponse = {
 
 export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'paid' | 'cancelled';
 export type DeliveryArea = 'inside_dhaka' | 'outside_dhaka';
+export type OrderEditRequestStatus = 'pending' | 'approved' | 'rejected';
+
+export type OrderItem = {
+  productId: string;
+  name: string;
+  slug: string;
+  image?: string;
+  quantity: number;
+  price: number;
+};
+
+export type OrderEditRequest = {
+  status: OrderEditRequestStatus;
+  requestedItems: OrderItem[];
+  requestedSubtotalAmount: number;
+  requestedTotalAmount: number;
+  note?: string;
+  adminNote?: string;
+  requestedAt: string;
+  respondedAt?: string;
+};
 
 export type Order = {
   _id: string;
@@ -68,16 +89,10 @@ export type Order = {
   deliveryCharge?: number;
   subtotalAmount?: number;
   paymentMethod: 'cash_on_delivery';
-  items: Array<{
-    productId: string;
-    name: string;
-    slug: string;
-    image?: string;
-    quantity: number;
-    price: number;
-  }>;
+  items: OrderItem[];
   totalAmount: number;
   orderStatus: OrderStatus;
+  editRequest?: OrderEditRequest;
   createdAt: string;
   updatedAt: string;
 };

@@ -5,7 +5,13 @@ export type CreateOrderPayload = {
   customerName: string;
   phone: string;
   address: string;
+  deliveryArea: DeliveryArea;
   paymentMethod: 'cash_on_delivery';
+  items: Array<{ productId: string; quantity: number }>;
+};
+
+export type OrderEditRequestPayload = {
+  note?: string;
   items: Array<{ productId: string; quantity: number }>;
 };
 
@@ -26,5 +32,20 @@ export async function getMyOrders() {
 
 export async function updateOrderStatus(id: string, status: OrderStatus) {
   const { data } = await api.patch<ApiResponse<Order>>(`/orders/admin/${id}/status`, { orderStatus: status });
+  return data.data;
+}
+
+export async function requestOrderEdit(id: string, payload: OrderEditRequestPayload) {
+  const { data } = await api.patch<ApiResponse<Order>>(`/orders/${id}/edit-request`, payload);
+  return data.data;
+}
+
+export async function approveOrderEditRequest(id: string, adminNote?: string) {
+  const { data } = await api.patch<ApiResponse<Order>>(`/orders/admin/${id}/edit-request/approve`, { adminNote });
+  return data.data;
+}
+
+export async function rejectOrderEditRequest(id: string, adminNote?: string) {
+  const { data } = await api.patch<ApiResponse<Order>>(`/orders/admin/${id}/edit-request/reject`, { adminNote });
   return data.data;
 }
