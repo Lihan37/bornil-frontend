@@ -53,6 +53,7 @@ export default function AdminDashboard() {
             <thead className="text-xs uppercase tracking-[0.18em] text-ink/45">
               <tr>
                 <th className="py-3">Customer</th>
+                <th>Products</th>
                 <th>Total</th>
                 <th>Status</th>
                 <th>Date</th>
@@ -62,13 +63,14 @@ export default function AdminDashboard() {
               {orders.slice(0, 5).map((order) => (
                 <tr key={order._id} className="transition hover:bg-blush/25">
                   <td className="py-4 font-bold">{order.customerName}</td>
+                  <td className="max-w-72 text-ink/65">{order.items.map((item) => `${item.name} x ${item.quantity}`).join(', ')}</td>
                   <td>{formatPrice(order.totalAmount)}</td>
                   <td><span className={`badge ${statusStyles[order.orderStatus]}`}>{order.orderStatus}</span></td>
                   <td className="text-ink/60">{new Date(order.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}
               {!orders.length ? (
-                <tr><td colSpan={4} className="py-6 text-center text-ink/50">No orders yet.</td></tr>
+                <tr><td colSpan={5} className="py-6 text-center text-ink/50">No orders yet.</td></tr>
               ) : null}
             </tbody>
           </table>

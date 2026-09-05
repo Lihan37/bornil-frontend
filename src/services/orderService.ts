@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { ApiResponse, Order, OrderStatus } from '../types';
+import type { ApiResponse, DeliveryArea, Order, OrderStatus } from '../types';
 
 export type CreateOrderPayload = {
   customerName: string;

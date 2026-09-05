@@ -56,6 +56,7 @@ export type AuthResponse = {
 };
 
 export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'paid' | 'cancelled';
+export type DeliveryArea = 'inside_dhaka' | 'outside_dhaka';
 
 export type Order = {
   _id: string;
@@ -63,6 +64,9 @@ export type Order = {
   customerName: string;
   phone: string;
   address: string;
+  deliveryArea?: DeliveryArea;
+  deliveryCharge?: number;
+  subtotalAmount?: number;
   paymentMethod: 'cash_on_delivery';
   items: Array<{
     productId: string;
