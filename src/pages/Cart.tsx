@@ -5,7 +5,6 @@ import { formatPrice } from '../utils/format';
 import { handleImageError } from '../utils/imageFallback';
 import { productImage } from '../utils/productImage';
 
-const DELIVERY = 120;
 
 export default function Cart() {
   const { items, updateQuantity, removeItem } = useCartStore();
@@ -19,7 +18,7 @@ export default function Cart() {
             <ShoppingBag size={26} />
           </div>
           <h1 className="mt-5 font-display text-4xl font-bold">Your cart is empty</h1>
-          <p className="mt-3 text-ink/60">Add your favorite Bornil Vibes pieces before checkout — each one is the only of its kind.</p>
+          <p className="mt-3 text-ink/60">Add your favorite Bornil Vibes pieces before checkout - each one is the only of its kind.</p>
           <Link to="/products" className="btn-gold mt-6">Shop products <ArrowRight size={16} /></Link>
         </div>
       </section>
@@ -68,11 +67,11 @@ export default function Cart() {
         <h2 className="font-display text-2xl font-bold">Order summary</h2>
         <div className="mt-6 space-y-3 text-sm">
           <div className="flex justify-between text-ink/70"><span>Subtotal</span><span className="font-bold text-ink">{formatPrice(total)}</span></div>
-          <div className="flex justify-between text-ink/70"><span>Delivery</span><span className="font-bold text-ink">{formatPrice(total > 0 ? DELIVERY : 0)}</span></div>
+          <div className="flex justify-between text-ink/70"><span>Delivery</span><span className="font-bold text-ink">Choose at checkout</span></div>
           <div className="my-2 hairline" />
           <div className="flex items-baseline justify-between">
             <span className="font-bold">Total</span>
-            <span className="text-2xl font-extrabold text-gilded">{formatPrice(total + DELIVERY)}</span>
+            <span className="text-2xl font-extrabold text-gilded">{formatPrice(total)}</span>
           </div>
         </div>
         <Link to="/checkout" className="btn-primary mt-6 w-full">Proceed to checkout <ArrowRight size={16} /></Link>

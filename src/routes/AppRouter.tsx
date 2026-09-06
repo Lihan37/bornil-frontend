@@ -32,8 +32,8 @@ export default function AppRouter() {
           <Route path="cart" element={<Cart />} />
           <Route path="login" element={<LoginRegister />} />
           <Route path="signup" element={<LoginRegister />} />
+          <Route path="checkout" element={<Checkout />} />
           <Route element={<ProtectedRoute />}>
-            <Route path="checkout" element={<Checkout />} />
             <Route path="dashboard" element={<ClientDashboard />} />
             <Route path="dashboard/profile" element={<Profile />} />
             <Route path="dashboard/orders" element={<OrderHistory />} />
