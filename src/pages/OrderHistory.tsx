@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+﻿import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PackageOpen } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -101,12 +101,21 @@ export default function OrderHistory() {
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-roseGold">{new Date(order.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                   <h2 className="mt-1 font-display text-2xl font-bold">Order #{order._id.slice(-6).toUpperCase()}</h2>
                   <p className="mt-1 text-sm text-ink/55">{order.items.length} {order.items.length === 1 ? 'item' : 'items'}</p>
+                  <p className="mt-1 text-sm text-ink/55">{getDeliveryLabel(order)} - {order.address}</p>
                 </div>
                 <div className="flex items-center gap-4 sm:flex-col sm:items-end">
                   <p className="text-xl font-extrabold">{formatPrice(order.totalAmount)}</p>
                   <span className={`badge ${statusStyles[order.orderStatus]}`}>{order.orderStatus}</span>
                 </div>
               </div>
+
+              {order.adminEditedAt ? (
+                <div className="mt-4 rounded-2xl border border-goldLight/50 bg-goldLight/15 p-4 text-sm">
+                  <p className="font-bold text-ink">Order updated by admin</p>
+                  <p className="mt-1 text-ink/60">Updated on {new Date(order.adminEditedAt).toLocaleString()}</p>
+                  {order.adminEditNote ? <p className="mt-1 text-ink/60">Admin note: {order.adminEditNote}</p> : null}
+                </div>
+              ) : null}
 
               {order.editRequest ? (
                 <div className="mt-4 rounded-2xl border border-roseGold/10 bg-white p-4 text-sm">

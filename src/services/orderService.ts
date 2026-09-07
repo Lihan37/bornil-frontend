@@ -24,6 +24,15 @@ export type OrderEditRequestPayload = {
   items: Array<{ productId: string; quantity: number }>;
 };
 
+export type AdminOrderUpdatePayload = {
+  customerName?: string;
+  phone?: string;
+  address?: string;
+  deliveryArea?: DeliveryArea;
+  adminNote?: string;
+  items?: Array<{ productId: string; quantity: number }>;
+};
+
 export async function createOrder(payload: CreateOrderPayload) {
   const { data } = await api.post<ApiResponse<CreateOrderResponse>>('/orders', payload);
   return data.data;
@@ -36,6 +45,11 @@ export async function getOrders() {
 
 export async function getMyOrders() {
   const { data } = await api.get<ApiResponse<Order[]>>('/orders/my-orders');
+  return data.data;
+}
+
+export async function updateAdminOrder(id: string, payload: AdminOrderUpdatePayload) {
+  const { data } = await api.patch<ApiResponse<Order>>('/orders/admin/' + id, payload);
   return data.data;
 }
 

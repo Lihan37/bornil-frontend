@@ -1,4 +1,4 @@
-export type Role = 'user' | 'admin';
+﻿export type Role = 'user' | 'admin';
 
 export type Category =
   | 'Earrings'
@@ -104,6 +104,8 @@ export type Order = {
   orderStatus: OrderStatus;
   inventoryRestored?: boolean;
   editRequest?: OrderEditRequest;
+  adminEditedAt?: string;
+  adminEditNote?: string;
   createdAt: string;
   updatedAt: string;
 };
