@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { CalendarDays, ChevronLeft, ChevronRight, Plus, Search, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import AdminShell from './AdminShell';
 import LoadingState from '../../components/LoadingState';
@@ -9,7 +9,8 @@ import { getProducts } from '../../services/productService';
 import type { DeliveryArea, Order, OrderStatus, Product } from '../../types';
 import { formatPrice } from '../../utils/format';
 
-const statuses: OrderStatus[] = ['pending', 'processing', 'shipped', 'delivered', 'paid', 'cancelled'];
+const statuses: OrderStatus[] = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'paid', 'cancelled'];
+const pageSizeOptions = [5, 10, 20];
 
 const statusStyles: Record<OrderStatus, string> = {
   pending: 'bg-amber-100 text-amber-700',
@@ -32,6 +33,7 @@ const deliveryCharges: Record<DeliveryArea, number> = {
 };
 
 type DraftItem = { productId: string; quantity: number };
+type FilterStatus = OrderStatus | 'all';
 
 type DraftOrder = {
   customerName: string;
@@ -56,6 +58,16 @@ function getDeliveryLabel(order: Order) {
 
 function requestedQuantity(order: Order, productId: string) {
   return order.editRequest?.requestedItems.find((item) => item.productId === productId)?.quantity;
+}
+
+function toDateInputValue(value: string | Date) {
+  const date = new Date(value);
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 10);
+}
+
+function todayInputValue() {
+  return toDateInputValue(new Date());
 }
 
 function draftFromOrder(order: Order): DraftOrder {
@@ -89,6 +101,14 @@ function uniqueDraftItems(items: DraftItem[]) {
   return [...map.entries()].map(([productId, quantity]) => ({ productId, quantity }));
 }
 
+function orderMatchesSearch(order: Order, search: string) {
+  if (!search.trim()) return true;
+  const query = search.trim().toLowerCase();
+  return [order.customerName, order.phone, order.address, order.orderStatus, ...order.items.map((item) => item.name)]
+    .filter(Boolean)
+    .some((value) => value.toLowerCase().includes(query));
+}
+
 export default function Orders() {
   const queryClient = useQueryClient();
   const { data: orders = [], isLoading } = useQuery({ queryKey: ['orders'], queryFn: getOrders });
@@ -97,6 +117,34 @@ export default function Orders() {
   const productsById = useMemo(() => new Map(products.map((product) => [product._id, product])), [products]);
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [draft, setDraft] = useState<DraftOrder | null>(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const filteredOrders = useMemo(() => orders.filter((order) => {
+    const matchesDate = selectedDate ? toDateInputValue(order.createdAt) === selectedDate : true;
+    const matchesStatus = statusFilter === 'all' ? true : order.orderStatus === statusFilter;
+    return matchesDate && matchesStatus && orderMatchesSearch(order, search);
+  }), [orders, search, selectedDate, statusFilter]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
+  const paginatedOrders = useMemo(() => filteredOrders.slice((page - 1) * pageSize, page * pageSize), [filteredOrders, page, pageSize]);
+  const summary = useMemo(() => filteredOrders.reduce((acc, order) => {
+    acc.revenue += order.orderStatus === 'cancelled' ? 0 : order.totalAmount;
+    acc.items += order.items.reduce((sum, item) => sum + item.quantity, 0);
+    if (order.orderStatus === 'pending' || order.orderStatus === 'confirmed') acc.open += 1;
+    return acc;
+  }, { revenue: 0, items: 0, open: 0 }), [filteredOrders]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, selectedDate, statusFilter, pageSize]);
+
+  useEffect(() => {
+    if (page > pageCount) setPage(pageCount);
+  }, [page, pageCount]);
 
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: OrderStatus }) => updateOrderStatus(id, status),
@@ -104,7 +152,7 @@ export default function Orders() {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast.success('Order status updated');
     },
-    onError: () => toast.error('Could not update order status. Check your backend API.'),
+    onError: () => toast.error('Could not update order status. Check stock and backend API.'),
   });
 
   const adminUpdateMutation = useMutation({
@@ -183,8 +231,59 @@ export default function Orders() {
   return (
     <AdminShell title="Orders">
       {isLoading ? <LoadingState label="Loading orders..." /> : null}
+
+      <div className="mb-5 grid gap-3 rounded-3xl border border-roseGold/10 bg-white/90 p-4 shadow-[0_18px_40px_-32px_rgba(74,40,48,0.45)] lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <label className="text-sm font-bold text-ink">
+            <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink/45"><CalendarDays size={15} /> Date</span>
+            <input className="field" type="date" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} />
+          </label>
+          <label className="text-sm font-bold text-ink">
+            <span className="mb-2 block text-xs uppercase tracking-[0.16em] text-ink/45">Status</span>
+            <select className="field" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as FilterStatus)}>
+              <option value="all">All statuses</option>
+              {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
+            </select>
+          </label>
+          <label className="text-sm font-bold text-ink sm:col-span-2">
+            <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink/45"><Search size={15} /> Search</span>
+            <input className="field" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Name, phone, address, product" />
+          </label>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn-secondary py-2" type="button" onClick={() => setSelectedDate(todayInputValue())}>Today</button>
+          <button className="btn-secondary py-2" type="button" onClick={() => { setSelectedDate(''); setStatusFilter('all'); setSearch(''); }}>Clear</button>
+        </div>
+      </div>
+
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-roseGold/10 bg-white/85 p-4">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Showing</p>
+          <p className="mt-2 text-2xl font-extrabold text-ink">{filteredOrders.length}</p>
+        </div>
+        <div className="rounded-2xl border border-roseGold/10 bg-white/85 p-4">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Open orders</p>
+          <p className="mt-2 text-2xl font-extrabold text-ink">{summary.open}</p>
+        </div>
+        <div className="rounded-2xl border border-roseGold/10 bg-white/85 p-4">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Items</p>
+          <p className="mt-2 text-2xl font-extrabold text-ink">{summary.items}</p>
+        </div>
+        <div className="rounded-2xl border border-roseGold/10 bg-white/85 p-4">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Revenue</p>
+          <p className="mt-2 text-2xl font-extrabold text-ink">{formatPrice(summary.revenue)}</p>
+        </div>
+      </div>
+
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-ink/55">{selectedDate ? `Orders for ${selectedDate}` : 'All orders'} · page {page} of {pageCount}</p>
+        <select className="field w-full sm:w-32" value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}>
+          {pageSizeOptions.map((option) => <option key={option} value={option}>{option} / page</option>)}
+        </select>
+      </div>
+
       <div className="grid gap-4">
-        {orders.map((order) => {
+        {paginatedOrders.map((order) => {
           const subtotal = getOrderSubtotal(order);
           const deliveryCharge = getOrderDeliveryCharge(order);
           const hasPendingEdit = order.editRequest?.status === 'pending';
@@ -227,7 +326,7 @@ export default function Orders() {
                     className="field mt-2 min-w-44"
                     value={order.orderStatus}
                     onChange={(event) => statusMutation.mutate({ id: order._id, status: event.target.value as OrderStatus })}
-                    disabled={Boolean(isEditing)}
+                    disabled={Boolean(isEditing) || statusMutation.isPending}
                   >
                     {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
                   </select>
@@ -282,7 +381,7 @@ export default function Orders() {
                   <button className="btn-secondary py-2" type="button" onClick={() => { setEditingOrderId(null); setDraft(null); }}>Cancel</button>
                 </div>
               ) : (
-                <button className="btn-secondary mt-4 py-2" type="button" disabled={order.orderStatus === 'cancelled'} onClick={() => startEdit(order)}>Edit order</button>
+                <button className="btn-secondary mt-4 py-2" type="button" onClick={() => startEdit(order)}>Edit order</button>
               )}
 
               {order.editRequest ? (
@@ -306,8 +405,19 @@ export default function Orders() {
             </div>
           );
         })}
-        {!isLoading && !orders.length ? <p className="rounded-3xl border border-roseGold/10 bg-white/80 p-8 text-center text-ink/55">No orders yet.</p> : null}
+        {!isLoading && !filteredOrders.length ? <p className="rounded-3xl border border-roseGold/10 bg-white/80 p-8 text-center text-ink/55">No orders match these filters.</p> : null}
       </div>
+
+      {filteredOrders.length ? (
+        <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-roseGold/10 bg-white/80 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-ink/55">Showing {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, filteredOrders.length)} of {filteredOrders.length}</p>
+          <div className="flex items-center gap-2">
+            <button className="grid h-10 w-10 place-items-center rounded-full border border-roseGold/20 text-ink disabled:opacity-40" type="button" disabled={page === 1} onClick={() => setPage((current) => Math.max(1, current - 1))} aria-label="Previous page"><ChevronLeft size={18} /></button>
+            <span className="min-w-16 text-center text-sm font-bold text-ink">{page} / {pageCount}</span>
+            <button className="grid h-10 w-10 place-items-center rounded-full border border-roseGold/20 text-ink disabled:opacity-40" type="button" disabled={page === pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} aria-label="Next page"><ChevronRight size={18} /></button>
+          </div>
+        </div>
+      ) : null}
     </AdminShell>
   );
 }
