@@ -1,6 +1,7 @@
 import { ArrowRight, Minus, Plus, ShieldCheck, ShoppingBag, Trash2, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCartStore, selectCartTotal } from '../store/cartStore';
+import { trackInitiateCheckout } from '../utils/analytics';
 import { formatPrice } from '../utils/format';
 import { handleImageError } from '../utils/imageFallback';
 import { productImage } from '../utils/productImage';
@@ -74,7 +75,7 @@ export default function Cart() {
             <span className="text-2xl font-extrabold text-gilded">{formatPrice(total)}</span>
           </div>
         </div>
-        <Link to="/checkout" className="btn-primary mt-6 w-full">Proceed to checkout <ArrowRight size={16} /></Link>
+        <Link to="/checkout" onClick={() => trackInitiateCheckout(items, total)} className="btn-primary mt-6 w-full">Proceed to checkout <ArrowRight size={16} /></Link>
         <div className="mt-6 grid gap-2.5 border-t border-roseGold/10 pt-5 text-xs text-ink/60">
           <p className="flex items-center gap-2"><Truck size={15} className="text-roseGold" /> Nationwide delivery</p>
           <p className="flex items-center gap-2"><ShieldCheck size={15} className="text-roseGold" /> Cash on delivery available</p>

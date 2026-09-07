@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { createOrder } from '../services/orderService';
 import { useAuthStore } from '../store/authStore';
 import { selectCartTotal, useCartStore } from '../store/cartStore';
-import { trackBeginCheckout, trackPurchase } from '../utils/analytics';
+import { getBrowserTrackingContext, trackPurchaseOrder } from '../utils/analytics';
 import { formatPrice } from '../utils/format';
 
 const deliveryCharges = {
@@ -59,8 +59,7 @@ export default function Checkout() {
     mutationFn: createOrder,
     onSuccess: ({ order, auth }) => {
       if (auth) setAuth(auth.token, auth.user);
-      const value = typeof order?.totalAmount === 'number' ? order.totalAmount : grandTotal;
-      trackPurchase(items, value, order?._id);
+      trackPurchaseOrder(order);
       clearCart();
       toast.success(auth ? 'Order placed and account created' : 'Order placed successfully');
       navigate(auth ? '/dashboard/orders' : '/products');
@@ -68,10 +67,6 @@ export default function Checkout() {
     onError: () => toast.error('Could not place order. Check your backend API.'),
   });
 
-  useEffect(() => {
-    if (items.length) trackBeginCheckout(items, grandTotal);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const onSubmit = (values: CheckoutForm) => {
     if (!authUser && (!values.password || values.password.length < 6)) {
@@ -84,6 +79,7 @@ export default function Checkout() {
       email: values.email || undefined,
       password: authUser ? undefined : values.password,
       items: items.map(({ product, quantity }) => ({ productId: product._id, quantity })),
+      tracking: getBrowserTrackingContext(),
     });
   };
 

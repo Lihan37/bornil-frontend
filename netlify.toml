@@ -3,6 +3,12 @@
   publish = "dist"
 
 [[redirects]]
+  from = "/product-feed.xml"
+  to = "https://bornil-backend-production.up.railway.app/api/products/feed.xml"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

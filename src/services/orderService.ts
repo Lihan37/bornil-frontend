@@ -1,5 +1,6 @@
 import { api } from './api';
 import type { ApiResponse, AuthResponse, DeliveryArea, Order, OrderStatus } from '../types';
+import type { BrowserTrackingContext } from '../utils/analytics';
 
 export type CreateOrderPayload = {
   customerName: string;
@@ -10,6 +11,7 @@ export type CreateOrderPayload = {
   deliveryArea: DeliveryArea;
   paymentMethod: 'cash_on_delivery';
   items: Array<{ productId: string; quantity: number }>;
+  tracking?: BrowserTrackingContext;
 };
 
 export type CreateOrderResponse = {

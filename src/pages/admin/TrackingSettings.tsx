@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+﻿import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import AdminShell from './AdminShell';
@@ -30,7 +30,7 @@ export default function TrackingSettings() {
   return (
     <AdminShell title="Tracking & Marketing">
       {isLoading ? (
-        <LoadingState label="Loading settings…" />
+        <LoadingState label="Loading settings..." />
       ) : (
         <form
           onSubmit={(event) => {
@@ -42,28 +42,28 @@ export default function TrackingSettings() {
           <p className="eyebrow mb-2">Analytics & pixels</p>
           <h2 className="font-display text-2xl font-bold">Paste your tracking IDs</h2>
           <p className="mt-2 text-sm text-ink/55">
-            No code needed — the storefront loads these automatically. Save, then refresh the shop to apply.
+            No code needed - the storefront loads these automatically. Save, then refresh the shop to apply.
           </p>
 
           <div className="mt-6 grid gap-5">
             <Field
               label="Google Tag Manager ID"
               badge="Recommended"
-              hint="Manage your Meta Pixel & GA4 as tags inside GTM. Example: GTM-XXXXXXX"
+              hint="Recommended: manage Meta Pixel and GA4 tags inside GTM. Example: GTM-XXXXXXX"
               placeholder="GTM-XXXXXXX"
               value={form.gtmId}
               onChange={(v) => set('gtmId', v)}
             />
             <Field
               label="Meta (Facebook) Pixel ID"
-              hint="Only fill this if you are NOT loading the Pixel through GTM (avoids double-counting). Example: 1234567890123456"
+              hint="Use only as a fallback when no GTM ID is configured. If Pixel is inside GTM, keep this blank to avoid double-counting."
               placeholder="1234567890123456"
               value={form.metaPixelId}
               onChange={(v) => set('metaPixelId', v)}
             />
             <Field
               label="GA4 Measurement ID"
-              hint="Only fill this if you are NOT loading GA4 through GTM. Example: G-XXXXXXX"
+              hint="Use only as a fallback when no GTM ID is configured. If GA4 is inside GTM, keep this blank."
               placeholder="G-XXXXXXX"
               value={form.ga4Id}
               onChange={(v) => set('ga4Id', v)}
@@ -73,14 +73,14 @@ export default function TrackingSettings() {
           <div className="mt-6 rounded-2xl bg-blush/40 p-4 text-sm leading-6 text-ink/70">
             <p className="font-bold text-ink">How events reach your tags</p>
             <p className="mt-1">
-              The shop automatically sends these events to the GTM data layer:{' '}
-              <b>view_item</b>, <b>add_to_cart</b>, <b>begin_checkout</b>, <b>purchase</b> — each with product, price,
-              quantity and value. Build your triggers/tags in GTM on these event names.
+              The shop automatically sends these Meta-ready events to the GTM data layer:{' '}
+              <b>view_content</b>, <b>add_to_cart</b>, <b>initiate_checkout</b>, <b>purchase</b> - each with{' '}
+              <b>event_id</b>, <b>content_ids</b>, product price, quantity and value. Build GTM triggers/tags on these event names.
             </p>
           </div>
 
           <button type="submit" disabled={mutation.isPending} className="btn-primary mt-6">
-            {mutation.isPending ? 'Saving…' : 'Save settings'}
+            {mutation.isPending ? 'Saving...' : 'Save settings'}
           </button>
         </form>
       )}
