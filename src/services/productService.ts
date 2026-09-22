@@ -10,6 +10,14 @@ export async function getProducts(filters?: ProductFilters) {
   } satisfies PaginatedProducts;
 }
 
+export async function getAdminProducts(filters?: ProductFilters & { status?: string }) {
+  const { data } = await api.get<ApiResponse<Product[]>>('/products/admin/list', { params: filters });
+  return {
+    products: data.data,
+    meta: data.meta || { page: 1, limit: data.data.length, total: data.data.length, totalPages: 1 },
+  } satisfies PaginatedProducts;
+}
+
 export async function getProduct(id: string) {
   const { data } = await api.get<ApiResponse<Product>>(`/products/${id}`);
   return data.data;

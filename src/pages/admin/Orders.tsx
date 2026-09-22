@@ -117,30 +117,33 @@ export default function Orders() {
   const productsById = useMemo(() => new Map(products.map((product) => [product._id, product])), [products]);
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [draft, setDraft] = useState<DraftOrder | null>(null);
-  const [selectedDate, setSelectedDate] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   const filteredOrders = useMemo(() => orders.filter((order) => {
-    const matchesDate = selectedDate ? toDateInputValue(order.createdAt) === selectedDate : true;
+    const orderDate = toDateInputValue(order.createdAt);
+    const matchesDate = (!fromDate || orderDate >= fromDate) && (!toDate || orderDate <= toDate);
     const matchesStatus = statusFilter === 'all' ? true : order.orderStatus === statusFilter;
     return matchesDate && matchesStatus && orderMatchesSearch(order, search);
-  }), [orders, search, selectedDate, statusFilter]);
+  }), [orders, search, fromDate, toDate, statusFilter]);
 
   const pageCount = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
   const paginatedOrders = useMemo(() => filteredOrders.slice((page - 1) * pageSize, page * pageSize), [filteredOrders, page, pageSize]);
   const summary = useMemo(() => filteredOrders.reduce((acc, order) => {
-    acc.revenue += order.orderStatus === 'cancelled' ? 0 : order.totalAmount;
-    acc.items += order.items.reduce((sum, item) => sum + item.quantity, 0);
+    if (order.orderStatus === 'paid') acc.revenue += order.totalAmount;
+    if (order.orderStatus !== 'cancelled') acc.sales += 1;
+    if (order.orderStatus !== 'cancelled') acc.items += order.items.reduce((sum, item) => sum + item.quantity, 0);
     if (order.orderStatus === 'pending' || order.orderStatus === 'confirmed') acc.open += 1;
     return acc;
-  }, { revenue: 0, items: 0, open: 0 }), [filteredOrders]);
+  }, { revenue: 0, sales: 0, items: 0, open: 0 }), [filteredOrders]);
 
   useEffect(() => {
     setPage(1);
-  }, [search, selectedDate, statusFilter, pageSize]);
+  }, [search, fromDate, toDate, statusFilter, pageSize]);
 
   useEffect(() => {
     if (page > pageCount) setPage(pageCount);
@@ -233,10 +236,14 @@ export default function Orders() {
       {isLoading ? <LoadingState label="Loading orders..." /> : null}
 
       <div className="mb-5 grid gap-3 rounded-3xl border border-roseGold/10 bg-white/90 p-4 shadow-[0_18px_40px_-32px_rgba(74,40,48,0.45)] lg:grid-cols-[1fr_auto] lg:items-end">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <label className="text-sm font-bold text-ink">
-            <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink/45"><CalendarDays size={15} /> Date</span>
-            <input className="field" type="date" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} />
+            <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink/45"><CalendarDays size={15} /> From</span>
+            <input className="field" type="date" max={toDate || undefined} value={fromDate} onChange={(event) => setFromDate(event.target.value)} />
+          </label>
+          <label className="text-sm font-bold text-ink">
+            <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink/45"><CalendarDays size={15} /> To</span>
+            <input className="field" type="date" min={fromDate || undefined} value={toDate} onChange={(event) => setToDate(event.target.value)} />
           </label>
           <label className="text-sm font-bold text-ink">
             <span className="mb-2 block text-xs uppercase tracking-[0.16em] text-ink/45">Status</span>
@@ -251,15 +258,15 @@ export default function Orders() {
           </label>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button className="btn-secondary py-2" type="button" onClick={() => setSelectedDate(todayInputValue())}>Today</button>
-          <button className="btn-secondary py-2" type="button" onClick={() => { setSelectedDate(''); setStatusFilter('all'); setSearch(''); }}>Clear</button>
+          <button className="btn-secondary py-2" type="button" onClick={() => { const today = todayInputValue(); setFromDate(today); setToDate(today); }}>Today</button>
+          <button className="btn-secondary py-2" type="button" onClick={() => { setFromDate(''); setToDate(''); setStatusFilter('all'); setSearch(''); }}>Clear</button>
         </div>
       </div>
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-2xl border border-roseGold/10 bg-white/85 p-4">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Showing</p>
-          <p className="mt-2 text-2xl font-extrabold text-ink">{filteredOrders.length}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Sales</p>
+          <p className="mt-2 text-2xl font-extrabold text-ink">{summary.sales}</p>
         </div>
         <div className="rounded-2xl border border-roseGold/10 bg-white/85 p-4">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Open orders</p>
@@ -270,13 +277,13 @@ export default function Orders() {
           <p className="mt-2 text-2xl font-extrabold text-ink">{summary.items}</p>
         </div>
         <div className="rounded-2xl border border-roseGold/10 bg-white/85 p-4">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Revenue</p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Revenue (paid)</p>
           <p className="mt-2 text-2xl font-extrabold text-ink">{formatPrice(summary.revenue)}</p>
         </div>
       </div>
 
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-ink/55">{selectedDate ? `Orders for ${selectedDate}` : 'All orders'} · page {page} of {pageCount}</p>
+        <p className="text-sm text-ink/55">{fromDate || toDate ? `Orders from ${fromDate || 'start'} to ${toDate || 'today'}` : 'All orders'} · page {page} of {pageCount}</p>
         <select className="field w-full sm:w-32" value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}>
           {pageSizeOptions.map((option) => <option key={option} value={option}>{option} / page</option>)}
         </select>

@@ -1,13 +1,13 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import AdminShell from './AdminShell';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import LoadingState from '../../components/LoadingState';
 import { getCategories } from '../../services/categoryService';
-import { deleteProduct, getProducts, updateProduct } from '../../services/productService';
+import { deleteProduct, getAdminProducts, updateProduct } from '../../services/productService';
 import type { Product } from '../../types';
 import { formatPrice } from '../../utils/format';
 import { handleImageError } from '../../utils/imageFallback';
@@ -18,9 +18,21 @@ export default function ManageProducts() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [files, setFiles] = useState<FileList | null>(null);
-  const { data, isLoading } = useQuery({ queryKey: ['products', 'admin-manage'], queryFn: () => getProducts({ limit: 48 }) });
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  const [availability, setAvailability] = useState('');
+  const [status, setStatus] = useState('all');
+  const [sort, setSort] = useState('newest');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const { data, isLoading } = useQuery({
+    queryKey: ['products', 'admin-manage', { search, category, availability, status, sort, page, pageSize }],
+    queryFn: () => getAdminProducts({ search: search || undefined, category: category || undefined, availability: availability || undefined, status, sort, page, limit: pageSize }),
+  });
   const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: getCategories });
   const products = data?.products || [];
+  const meta = data?.meta;
+  useEffect(() => setPage(1), [search, category, availability, status, sort, pageSize]);
   const deleteMutation = useMutation({
     mutationFn: deleteProduct,
     onSuccess: () => {
@@ -64,6 +76,52 @@ export default function ManageProducts() {
 
   return (
     <AdminShell title="Manage products">
+      <div className="mb-5 grid gap-3 rounded-3xl border border-roseGold/10 bg-white/90 p-4 shadow-[0_18px_40px_-32px_rgba(74,40,48,0.45)] sm:grid-cols-2 xl:grid-cols-6">
+        <label className="sm:col-span-2 xl:col-span-2">
+          <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-ink/45"><Search size={15} /> Search</span>
+          <input className="field" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Product name or category" />
+        </label>
+        <label>
+          <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Category</span>
+          <select className="field" value={category} onChange={(event) => setCategory(event.target.value)}>
+            <option value="">All categories</option>
+            {categories.map((item) => <option key={item._id} value={item.name}>{item.name}</option>)}
+          </select>
+        </label>
+        <label>
+          <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Stock</span>
+          <select className="field" value={availability} onChange={(event) => setAvailability(event.target.value)}>
+            <option value="">All stock</option>
+            <option value="in-stock">In stock</option>
+            <option value="out-of-stock">Out of stock</option>
+          </select>
+        </label>
+        <label>
+          <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Status</span>
+          <select className="field" value={status} onChange={(event) => setStatus(event.target.value)}>
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </label>
+        <label>
+          <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-ink/45">Sort</span>
+          <select className="field" value={sort} onChange={(event) => setSort(event.target.value)}>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="price-low-high">Price: low to high</option>
+            <option value="price-high-low">Price: high to low</option>
+            <option value="stock-low-high">Stock: low to high</option>
+          </select>
+        </label>
+      </div>
+      <div className="mb-3 flex flex-col gap-2 text-sm text-ink/55 sm:flex-row sm:items-center sm:justify-between">
+        <p>Showing {products.length} of {meta?.total ?? 0} products</p>
+        <select className="field w-full sm:w-36" value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}>
+          {[10, 20, 50, 100].map((size) => <option key={size} value={size}>{size} / page</option>)}
+        </select>
+      </div>
       {isLoading ? <LoadingState label="Loading products…" /> : null}
       <div className="grid gap-4">
         {products.map((product) => (
@@ -90,8 +148,17 @@ export default function ManageProducts() {
             </div>
           </div>
         ))}
-        {!isLoading && !products.length ? <p className="rounded-3xl border border-roseGold/10 bg-white/80 p-8 text-center text-ink/55">No products yet.</p> : null}
+        {!isLoading && !products.length ? <p className="rounded-3xl border border-roseGold/10 bg-white/80 p-8 text-center text-ink/55">No products match these filters.</p> : null}
       </div>
+      {(meta?.totalPages ?? 0) > 1 ? (
+        <div className="mt-5 flex items-center justify-between rounded-2xl border border-roseGold/10 bg-white/80 p-3">
+          <p className="text-sm text-ink/55">Page {meta?.page} of {meta?.totalPages}</p>
+          <div className="flex items-center gap-2">
+            <button className="grid h-10 w-10 place-items-center rounded-full border border-roseGold/20 disabled:opacity-40" type="button" disabled={page <= 1} onClick={() => setPage((current) => current - 1)} aria-label="Previous page"><ChevronLeft size={18} /></button>
+            <button className="grid h-10 w-10 place-items-center rounded-full border border-roseGold/20 disabled:opacity-40" type="button" disabled={page >= (meta?.totalPages ?? 1)} onClick={() => setPage((current) => current + 1)} aria-label="Next page"><ChevronRight size={18} /></button>
+          </div>
+        </div>
+      ) : null}
       {editing ? (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/60 p-4 backdrop-blur-sm">
           <form onSubmit={handleEditSubmit} className="animate-fade-scale mx-auto my-8 max-w-3xl rounded-4xl border border-white/60 bg-white p-6 shadow-lux sm:p-8">
