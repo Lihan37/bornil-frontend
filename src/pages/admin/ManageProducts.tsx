@@ -6,12 +6,11 @@ import { toast } from 'sonner';
 import AdminShell from './AdminShell';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import LoadingState from '../../components/LoadingState';
+import ResilientImage from '../../components/ResilientImage';
 import { getCategories } from '../../services/categoryService';
 import { deleteProduct, getAdminProducts, updateProduct } from '../../services/productService';
 import type { Product } from '../../types';
 import { formatPrice } from '../../utils/format';
-import { handleImageError } from '../../utils/imageFallback';
-import { productImage } from '../../utils/productImage';
 
 export default function ManageProducts() {
   const queryClient = useQueryClient();
@@ -126,7 +125,7 @@ export default function ManageProducts() {
       <div className="grid gap-4">
         {products.map((product) => (
           <div key={product._id} className="grid gap-4 rounded-3xl border border-roseGold/10 bg-white/90 p-4 shadow-[0_18px_40px_-30px_rgba(74,40,48,0.5)] backdrop-blur-sm transition hover:border-roseGold/25 md:grid-cols-[96px_1fr_auto] md:items-center">
-            <img src={productImage(product)} alt={product.name} onError={handleImageError} className="h-24 w-24 rounded-2xl object-cover" />
+            <ResilientImage sources={product.images.map((image) => image.url)} alt={product.name} className="h-24 w-24 rounded-2xl object-cover" />
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-roseGold">{product.category}</p>

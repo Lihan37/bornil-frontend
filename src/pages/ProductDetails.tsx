@@ -6,11 +6,11 @@ import { toast } from 'sonner';
 import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import ProductCard from '../components/ProductCard';
+import ResilientImage from '../components/ResilientImage';
 import { getProduct, getProducts } from '../services/productService';
 import { useCartStore } from '../store/cartStore';
 import { trackAddToCart, trackViewItem } from '../utils/analytics';
 import { formatPrice } from '../utils/format';
-import { handleImageError } from '../utils/imageFallback';
 import { productImage } from '../utils/productImage';
 
 export default function ProductDetails() {
@@ -35,6 +35,7 @@ export default function ProductDetails() {
   if (isError || !product) return <section className="container-pad py-10"><ErrorState message="Product not found." /></section>;
 
   const images = product.images.length ? product.images.map((image) => image.url) : [productImage(product)];
+  const activeImageSources = [images[activeImage], ...images.filter((_, index) => index !== activeImage)];
 
   const hasDiscount = Boolean(product.oldPrice && product.oldPrice > product.price);
   const isAvailable = product.stock > 0;
@@ -62,13 +63,13 @@ export default function ProductDetails() {
         <div className="lg:sticky lg:top-28 lg:self-start">
         <div className="relative overflow-hidden rounded-4xl bg-blush shadow-soft">
           {hasDiscount ? <span className="badge-rose absolute left-4 top-4 z-10">Sale</span> : null}
-          <img src={images[activeImage]} alt={product.name} onError={handleImageError} className="aspect-square w-full object-cover transition duration-500" />
+          <ResilientImage sources={activeImageSources} alt={product.name} className="aspect-square w-full object-cover transition duration-500" />
         </div>
         {images.length > 1 ? (
           <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
             {images.map((image, index) => (
               <button key={image} onClick={() => setActiveImage(index)} className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border-2 border-transparent bg-white transition data-[active=true]:border-roseGold data-[active=true]:shadow-soft" data-active={activeImage === index} type="button">
-                <img src={image} alt={`${product.name} ${index + 1}`} onError={handleImageError} className="h-full w-full object-cover" />
+                <ResilientImage sources={[image]} alt={`${product.name} ${index + 1}`} className="h-full w-full object-cover" />
               </button>
             ))}
           </div>

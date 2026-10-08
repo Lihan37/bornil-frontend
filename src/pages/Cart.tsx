@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCartStore, selectCartTotal } from '../store/cartStore';
 import { trackInitiateCheckout } from '../utils/analytics';
 import { formatPrice } from '../utils/format';
-import { handleImageError } from '../utils/imageFallback';
-import { productImage } from '../utils/productImage';
+import ResilientImage from '../components/ResilientImage';
 
 
 export default function Cart() {
@@ -37,7 +36,7 @@ export default function Cart() {
           {items.map(({ product, quantity }) => (
             <div key={product._id} className="grid gap-4 rounded-3xl border border-roseGold/10 bg-white/90 p-4 shadow-[0_18px_40px_-30px_rgba(74,40,48,0.5)] backdrop-blur-sm transition hover:border-roseGold/25 sm:grid-cols-[110px_1fr_auto] sm:items-center">
               <Link to={`/products/${product._id}`} className="overflow-hidden rounded-2xl bg-blush">
-                <img src={productImage(product)} alt={product.name} onError={handleImageError} className="h-32 w-full object-cover transition duration-500 hover:scale-105 sm:h-28" />
+                <ResilientImage sources={product.images.map((image) => image.url)} alt={product.name} className="h-32 w-full object-cover transition duration-500 hover:scale-105 sm:h-28" />
               </Link>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-roseGold">{product.category}</p>

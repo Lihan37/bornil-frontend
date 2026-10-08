@@ -6,8 +6,7 @@ import { useCartStore } from '../store/cartStore';
 import type { Product } from '../types';
 import { trackAddToCart } from '../utils/analytics';
 import { formatPrice } from '../utils/format';
-import { handleImageError } from '../utils/imageFallback';
-import { productImage } from '../utils/productImage';
+import ResilientImage from './ResilientImage';
 
 export default function ProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((state) => state.addItem);
@@ -27,10 +26,9 @@ export default function ProductCard({ product }: { product: Product }) {
     <article className="group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-roseGold/10 bg-white/90 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_18px_40px_-28px_rgba(74,40,48,0.4)] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-roseGold/25 hover:shadow-glow">
       <div className="relative overflow-hidden bg-blush">
         <Link to={`/products/${product._id}`} className="block">
-          <img
-            src={productImage(product)}
+          <ResilientImage
+            sources={product.images.map((image) => image.url)}
             alt={product.name}
-            onError={handleImageError}
             className="aspect-4/5 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
         </Link>
