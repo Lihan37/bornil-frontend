@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -64,7 +65,12 @@ export default function Checkout() {
       toast.success(auth ? 'Order placed and account created' : 'Order placed successfully');
       navigate(auth ? '/dashboard/orders' : '/products');
     },
-    onError: () => toast.error('Could not place order. Check your backend API.'),
+    onError: (error) => {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || 'Could not place order. Please try again.'
+        : 'Could not place order. Please try again.';
+      toast.error(message);
+    },
   });
 
 
